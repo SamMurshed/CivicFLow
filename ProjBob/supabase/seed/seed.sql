@@ -373,7 +373,7 @@ on conflict (id) do nothing;
 -- ──────────────────────────────────────────────────────────
 with seed_review_actions (id, request_id, analyst_id, decision, note) as (
   values
-  ('f0000002-0000-0000-0000-000000000001'::uuid, :req_under_review, :user_analyst1,
+  ('f0000002-0000-0000-0000-000000000001'::uuid, (:req_under_review)::uuid, (:user_analyst1)::uuid,
    'request_correction'::public.review_decision,
    'Opening review. Initial documents present. Financial statements and scope document require verification.'),
   ('f0000002-0000-0000-0000-000000000002'::uuid, :req_awaiting, :user_analyst2, 'request_correction',
@@ -396,7 +396,7 @@ where not exists (
 with seed_status_history (id, request_id, changed_by, from_status, to_status, reason) as (
   values
   -- req_submitted
-  ('f0000003-0000-0000-0000-000000000001'::uuid, :req_submitted, :user_agency2, null::public.request_status, 'draft'::public.request_status, 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000001'::uuid, (:req_submitted)::uuid, (:user_agency2)::uuid, null::public.request_status, 'draft'::public.request_status, 'Request created.'),
   ('f0000003-0000-0000-0000-000000000002'::uuid, :req_submitted, :user_agency2, 'draft', 'submitted', 'Submitted for analyst review.'),
 
   -- req_under_review
