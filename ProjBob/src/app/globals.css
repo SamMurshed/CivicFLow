@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* ─── CivicFlow Design Tokens ──────────────────────────────────────────────
+   Public-sector visual style:
+   - Readable 15px base typography, 1.6 line-height
+   - Neutral slate backgrounds, strong contrast text
+   - Single accent colour: blue-600 (#2563eb)
+   - No dark mode (accessibility-first, consistent contrast)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
+
+  /* Accent */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-light: #eff6ff;
+  --color-accent-border: #bfdbfe;
+
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-subtle: #f1f5f9;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Text */
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-subtle: #94a3b8;
+
+  /* Status colours */
+  --color-status-draft: #64748b;
+  --color-status-submitted: #2563eb;
+  --color-status-under-review: #7c3aed;
+  --color-status-awaiting-correction: #d97706;
+  --color-status-correction-submitted: #0891b2;
+  --color-status-approved: #16a34a;
+  --color-status-rejected: #dc2626;
+  --color-status-withdrawn: #64748b;
+  --color-status-on-hold: #9333ea;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Focus rings ────────────────────────────────────────────────────────────
+   Visible, consistent, keyboard-only focus states.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ─── Skip link ──────────────────────────────────────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0.5rem;
+  z-index: 9999;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 4px 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ─── Scrollbar (thin, neutral) ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
+}
