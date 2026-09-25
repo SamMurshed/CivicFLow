@@ -350,97 +350,111 @@ on conflict (request_id, item_key) do nothing;
 -- ──────────────────────────────────────────────────────────
 -- 9. Comments
 -- ──────────────────────────────────────────────────────────
-insert into public.comments (request_id, author_id, body, is_internal) values
-  (:req_under_review, :user_analyst1,
+insert into public.comments (id, request_id, author_id, body, is_internal) values
+  ('f0000001-0000-0000-0000-000000000001', :req_under_review, :user_analyst1,
    'Request received and under active review. I will reach out if additional documentation is needed.',
    false),
-  (:req_awaiting, :user_analyst2,
+  ('f0000001-0000-0000-0000-000000000002', :req_awaiting, :user_analyst2,
    'Two correction items raised — please see the checklist. Provide the missing financial statements and update the scope document with SLA detail.',
    false),
-  (:req_awaiting, :user_agency3,
+  ('f0000001-0000-0000-0000-000000000003', :req_awaiting, :user_agency3,
    'Understood. We will coordinate with Blue Ridge and upload revised documents within five business days.',
    false),
-  (:req_awaiting, :user_analyst2,
+  ('f0000001-0000-0000-0000-000000000004', :req_awaiting, :user_analyst2,
    'Internal note: vendor previously submitted an incomplete financial package on request REQ-2024-0091. Watch for same issue.',
    true),
-  (:req_approved, :user_analyst1,
+  ('f0000001-0000-0000-0000-000000000005', :req_approved, :user_analyst1,
    'Congratulations — this request has been approved. You will receive formal notification shortly.',
    false)
-on conflict do nothing;
+on conflict (id) do nothing;
 
 -- ──────────────────────────────────────────────────────────
 -- 10. Review actions
 -- ──────────────────────────────────────────────────────────
-insert into public.review_actions (request_id, analyst_id, decision, note) values
-  (:req_under_review, :user_analyst1, 'request_correction',
+with seed_review_actions (id, request_id, analyst_id, decision, note) as (
+  values
+  ('f0000002-0000-0000-0000-000000000001'::uuid, :req_under_review, :user_analyst1,
+   'request_correction'::public.review_decision,
    'Opening review. Initial documents present. Financial statements and scope document require verification.'),
-  (:req_awaiting, :user_analyst2, 'request_correction',
+  ('f0000002-0000-0000-0000-000000000002'::uuid, :req_awaiting, :user_analyst2, 'request_correction',
    'Flagging two items: financial statements and scope of work SLA detail.'),
-  (:req_approved, :user_analyst1, 'approve',
+  ('f0000002-0000-0000-0000-000000000003'::uuid, :req_approved, :user_analyst1, 'approve',
    'All items satisfied. Approved.'),
-  (:req_rejected, :user_analyst2, 'reject',
+  ('f0000002-0000-0000-0000-000000000004'::uuid, :req_rejected, :user_analyst2, 'reject',
    'Insurance certificate could not be renewed. Scope document insufficient. Rejected.')
-on conflict do nothing;
+)
+insert into public.review_actions (id, request_id, analyst_id, decision, note)
+select seed.id, seed.request_id, seed.analyst_id, seed.decision, seed.note
+from seed_review_actions seed
+where not exists (
+  select 1 from public.review_actions existing where existing.id = seed.id
+);
 
 -- ──────────────────────────────────────────────────────────
 -- 11. Status history
 -- ──────────────────────────────────────────────────────────
-insert into public.status_history (request_id, changed_by, from_status, to_status, reason) values
+with seed_status_history (id, request_id, changed_by, from_status, to_status, reason) as (
+  values
   -- req_submitted
-  (:req_submitted, :user_agency2, null, 'draft', 'Request created.'),
-  (:req_submitted, :user_agency2, 'draft', 'submitted', 'Submitted for analyst review.'),
+  ('f0000003-0000-0000-0000-000000000001'::uuid, :req_submitted, :user_agency2, null::public.request_status, 'draft'::public.request_status, 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000002'::uuid, :req_submitted, :user_agency2, 'draft', 'submitted', 'Submitted for analyst review.'),
 
   -- req_under_review
-  (:req_under_review, :user_agency3, null, 'draft', 'Request created.'),
-  (:req_under_review, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
-  (:req_under_review, :user_analyst1, 'submitted', 'under_review', 'Analyst assigned and review commenced.'),
+  ('f0000003-0000-0000-0000-000000000003'::uuid, :req_under_review, :user_agency3, null, 'draft', 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000004'::uuid, :req_under_review, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
+  ('f0000003-0000-0000-0000-000000000005'::uuid, :req_under_review, :user_analyst1, 'submitted', 'under_review', 'Analyst assigned and review commenced.'),
 
   -- req_awaiting
-  (:req_awaiting, :user_agency3, null, 'draft', 'Request created.'),
-  (:req_awaiting, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
-  (:req_awaiting, :user_analyst2, 'submitted', 'under_review', 'Analyst assigned and review commenced.'),
-  (:req_awaiting, :user_analyst2, 'under_review', 'awaiting_correction', 'Two checklist items flagged for correction.'),
+  ('f0000003-0000-0000-0000-000000000006'::uuid, :req_awaiting, :user_agency3, null, 'draft', 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000007'::uuid, :req_awaiting, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
+  ('f0000003-0000-0000-0000-000000000008'::uuid, :req_awaiting, :user_analyst2, 'submitted', 'under_review', 'Analyst assigned and review commenced.'),
+  ('f0000003-0000-0000-0000-000000000009'::uuid, :req_awaiting, :user_analyst2, 'under_review', 'awaiting_correction', 'Two checklist items flagged for correction.'),
 
   -- req_approved
-  (:req_approved, :user_agency1, null, 'draft', 'Request created.'),
-  (:req_approved, :user_agency1, 'draft', 'submitted', 'Submitted for analyst review.'),
-  (:req_approved, :user_analyst1, 'submitted', 'under_review', 'Review commenced.'),
-  (:req_approved, :user_analyst1, 'under_review', 'approved', 'All items satisfied. Approved.'),
+  ('f0000003-0000-0000-0000-000000000010'::uuid, :req_approved, :user_agency1, null, 'draft', 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000011'::uuid, :req_approved, :user_agency1, 'draft', 'submitted', 'Submitted for analyst review.'),
+  ('f0000003-0000-0000-0000-000000000012'::uuid, :req_approved, :user_analyst1, 'submitted', 'under_review', 'Review commenced.'),
+  ('f0000003-0000-0000-0000-000000000013'::uuid, :req_approved, :user_analyst1, 'under_review', 'approved', 'All items satisfied. Approved.'),
 
   -- req_rejected
-  (:req_rejected, :user_agency3, null, 'draft', 'Request created.'),
-  (:req_rejected, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
-  (:req_rejected, :user_analyst2, 'submitted', 'under_review', 'Review commenced.'),
-  (:req_rejected, :user_analyst2, 'under_review', 'awaiting_correction', 'Insurance and scope items flagged.'),
-  (:req_rejected, :user_analyst2, 'awaiting_correction', 'rejected', 'Insurance certificate could not be renewed. Rejected.')
-
-on conflict do nothing;
+  ('f0000003-0000-0000-0000-000000000014'::uuid, :req_rejected, :user_agency3, null, 'draft', 'Request created.'),
+  ('f0000003-0000-0000-0000-000000000015'::uuid, :req_rejected, :user_agency3, 'draft', 'submitted', 'Submitted for analyst review.'),
+  ('f0000003-0000-0000-0000-000000000016'::uuid, :req_rejected, :user_analyst2, 'submitted', 'under_review', 'Review commenced.'),
+  ('f0000003-0000-0000-0000-000000000017'::uuid, :req_rejected, :user_analyst2, 'under_review', 'awaiting_correction', 'Insurance and scope items flagged.'),
+  ('f0000003-0000-0000-0000-000000000018'::uuid, :req_rejected, :user_analyst2, 'awaiting_correction', 'rejected', 'Insurance certificate could not be renewed. Rejected.')
+)
+insert into public.status_history (id, request_id, changed_by, from_status, to_status, reason)
+select seed.id, seed.request_id, seed.changed_by, seed.from_status, seed.to_status, seed.reason
+from seed_status_history seed
+where not exists (
+  select 1 from public.status_history existing where existing.id = seed.id
+);
 
 -- ──────────────────────────────────────────────────────────
 -- 12. Notifications
 -- ──────────────────────────────────────────────────────────
-insert into public.notifications (recipient_id, request_id, title, body, is_read) values
-  (:user_agency3, :req_awaiting,
+insert into public.notifications (id, recipient_id, request_id, title, body, is_read) values
+  ('f0000004-0000-0000-0000-000000000001', :user_agency3, :req_awaiting,
    'Corrections Required on Your Request',
    'Analyst Priya Reyes has raised two correction items on "Document Management System Implementation". Please review and respond.',
    false),
-  (:user_vendor2, :req_awaiting,
+  ('f0000004-0000-0000-0000-000000000002', :user_vendor2, :req_awaiting,
    'Action Required: Procurement Request Corrections',
    'Corrections have been requested on the Document Management System Implementation procurement. Please provide updated documents.',
    false),
-  (:user_agency1, :req_approved,
+  ('f0000004-0000-0000-0000-000000000003', :user_agency1, :req_approved,
    'Request Approved',
    'Your procurement request "Public Park Grounds Maintenance Contract" has been approved.',
    true),
-  (:user_vendor3, :req_approved,
+  ('f0000004-0000-0000-0000-000000000004', :user_vendor3, :req_approved,
    'Procurement Request Approved',
    'The procurement request you are attached to ("Public Park Grounds Maintenance Contract") has been approved.',
    true),
-  (:user_agency3, :req_rejected,
+  ('f0000004-0000-0000-0000-000000000005', :user_agency3, :req_rejected,
    'Request Rejected',
    'Your procurement request "Catering Services for Council Events" has been rejected. See the decision rationale for details.',
    false)
-on conflict do nothing;
+on conflict (id) do nothing;
 
 -- ──────────────────────────────────────────────────────────
 -- Re-enable standard role
