@@ -12,6 +12,9 @@ import {
 } from '@/db/procurement-requests';
 import { StatusBadge } from '@/components/ui';
 import ReviewDecisionForm from '@/components/analyst/ReviewDecisionForm';
+import StartReviewButton from '@/components/analyst/StartReviewButton';
+import ChecklistReviewForm from '@/components/analyst/ChecklistReviewForm';
+import DocumentReviewForm from '@/components/analyst/DocumentReviewForm';
 import CommentForm from '@/components/shared/CommentForm';
 import type { RequestStatus } from '@/types/database';
 
@@ -63,6 +66,9 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
     request.status === 'withdrawn';
 
   const completion = calcChecklistCompletion(checklistItems);
+  const canStartReview =
+    request.status === 'submitted' || request.status === 'correction_submitted';
+  const canReview = request.status === 'under_review' || request.status === 'on_hold';
 
   return (
     <div className="space-y-6">
@@ -96,7 +102,7 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
             <dl className="divide-y divide-slate-100">
               <div className="grid grid-cols-3 gap-4 px-5 py-3">
                 <dt className="text-xs font-medium text-slate-500">Description</dt>
-                <dd className="col-span-2 text-sm text-slate-800 whitespace-pre-wrap">
+                <dd className="col-span-2 text-sm whitespace-pre-wrap text-slate-800">
                   {request.description}
                 </dd>
               </div>
@@ -167,9 +173,8 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
               <ul className="divide-y divide-slate-100">
                 {checklistItems.map((item) => {
                   const statusCfg =
-                    CHECKLIST_STATUS_CONFIG[
-                      item.status as keyof typeof CHECKLIST_STATUS_CONFIG
-                    ] ?? CHECKLIST_STATUS_CONFIG.pending;
+                    CHECKLIST_STATUS_CONFIG[item.status as keyof typeof CHECKLIST_STATUS_CONFIG] ??
+                    CHECKLIST_STATUS_CONFIG.pending;
                   return (
                     <li key={item.id} className="px-5 py-3">
                       <div className="flex items-start justify-between gap-3">
@@ -189,6 +194,14 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
                             <p className="mt-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
                               Note: {item.analyst_note}
                             </p>
+                          )}
+                          {canReview && (
+                            <ChecklistReviewForm
+                              requestId={requestId}
+                              itemId={item.id}
+                              currentStatus={item.status}
+                              currentNote={item.analyst_note}
+                            />
                           )}
                         </div>
                         <span
@@ -218,20 +231,19 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
             ) : (
               <ul className="divide-y divide-slate-100">
                 {documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                  <li
+                    key={doc.id}
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
+                  >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">
-                        {doc.file_name}
-                      </p>
+                      <p className="truncate text-sm font-medium text-slate-800">{doc.file_name}</p>
                       <p className="text-xs text-slate-500">
                         {doc.mime_type}
                         {doc.file_size_bytes ? ` · ${formatBytes(doc.file_size_bytes)}` : ''}
                         {` · Uploaded ${new Date(doc.created_at).toLocaleDateString()}`}
                       </p>
                       {doc.reviewer_note && (
-                        <p className="mt-1 text-xs text-amber-700">
-                          Note: {doc.reviewer_note}
-                        </p>
+                        <p className="mt-1 text-xs text-amber-700">Note: {doc.reviewer_note}</p>
                       )}
                     </div>
                     <span
@@ -246,6 +258,24 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
                     >
                       {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
                     </span>
+                    <a
+                      href={`/api/documents/${doc.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 text-xs font-medium text-blue-700 hover:underline"
+                    >
+                      Open
+                    </a>
+                    {request.status === 'under_review' && (
+                      <div className="w-full basis-full">
+                        <DocumentReviewForm
+                          requestId={requestId}
+                          documentId={doc.id}
+                          currentStatus={doc.status}
+                          currentNote={doc.reviewer_note}
+                        />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -255,9 +285,7 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
           {/* Comments (including internal) */}
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 px-5 py-4">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Comments ({comments.length})
-              </h2>
+              <h2 className="text-sm font-semibold text-slate-900">Comments ({comments.length})</h2>
             </div>
             <div className="divide-y divide-slate-100">
               {comments.length === 0 && (
@@ -283,7 +311,7 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
                       {new Date(comment.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-800 whitespace-pre-wrap">{comment.body}</p>
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-slate-800">{comment.body}</p>
                 </div>
               ))}
             </div>
@@ -302,7 +330,17 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
         {/* Right: decision panel + history */}
         <div className="space-y-6">
           {/* Review decision */}
-          {!isTerminal && (
+          {canStartReview && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-5 shadow-sm">
+              <h2 className="mb-2 text-sm font-semibold text-slate-900">Begin Review</h2>
+              <p className="mb-4 text-xs text-slate-600">
+                Claim this request and move it into active review before recording findings.
+              </p>
+              <StartReviewButton requestId={requestId} />
+            </div>
+          )}
+
+          {canReview && !isTerminal && (
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="mb-4 text-sm font-semibold text-slate-900">Review Decision</h2>
               <ReviewDecisionForm
@@ -317,8 +355,8 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm">
               <p className="text-xs text-slate-500">
                 This request has been{' '}
-                <strong>{request.status === 'withdrawn' ? 'withdrawn' : 'decided'}</strong>.
-                No further actions are available.
+                <strong>{request.status === 'withdrawn' ? 'withdrawn' : 'decided'}</strong>. No
+                further actions are available.
               </p>
             </div>
           )}
@@ -384,9 +422,7 @@ export default async function AnalystQueueDetailPage({ params }: PageProps) {
                     <p className="mt-1 text-xs text-slate-400">
                       {new Date(h.created_at).toLocaleString()}
                     </p>
-                    {h.reason && (
-                      <p className="mt-0.5 text-xs text-slate-500 italic">{h.reason}</p>
-                    )}
+                    {h.reason && <p className="mt-0.5 text-xs text-slate-500 italic">{h.reason}</p>}
                   </li>
                 ))}
               </ol>

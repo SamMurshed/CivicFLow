@@ -18,7 +18,9 @@ export default async function AgencyNotificationsPage({ searchParams }: PageProp
     <div>
       <div className="mb-6">
         <h1 className="text-xl font-bold text-slate-900">Notifications</h1>
-        <p className="mt-0.5 text-sm text-slate-500">{total} notification{total !== 1 ? 's' : ''}</p>
+        <p className="mt-0.5 text-sm text-slate-500">
+          {total} notification{total !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {notifications.length === 0 ? (

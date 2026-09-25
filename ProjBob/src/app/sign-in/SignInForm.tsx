@@ -41,7 +41,7 @@ export default function SignInForm({ next }: SignInFormProps) {
           type="email"
           required
           autoComplete="email"
-          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           placeholder="you@example.com"
         />
       </div>
@@ -56,7 +56,7 @@ export default function SignInForm({ next }: SignInFormProps) {
           type="password"
           required
           autoComplete="current-password"
-          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           placeholder="••••••••"
         />
       </div>

@@ -9,15 +9,8 @@
 
 import { useActionState } from 'react';
 import { Input, Select, Button, FormErrorSummary, Alert } from '@/components/ui';
-import {
-  PROCUREMENT_CATEGORIES,
-  getChecklistForCategory,
-} from '@/validation/procurement-request';
-import {
-  createRequest,
-  updateRequest,
-  INITIAL_STATE,
-} from '@/lib/procurement-request-actions';
+import { PROCUREMENT_CATEGORIES, getChecklistForCategory } from '@/validation/procurement-request';
+import { createRequest, updateRequest, INITIAL_STATE } from '@/lib/procurement-request-actions';
 import type { ProcurementRequest } from '@/types/database';
 
 interface ProcurementRequestFormProps {
@@ -38,9 +31,7 @@ export default function ProcurementRequestForm({ request }: ProcurementRequestFo
 
   return (
     <form action={formAction} className="space-y-6">
-      {isEdit && (
-        <input type="hidden" name="request_id" value={request!.id} />
-      )}
+      {isEdit && <input type="hidden" name="request_id" value={request!.id} />}
 
       {state.error && !Object.keys(state.fieldErrors ?? {}).length && (
         <Alert variant="error" title="Error">
@@ -74,7 +65,9 @@ export default function ProcurementRequestForm({ request }: ProcurementRequestFo
       <div className="flex flex-col gap-1">
         <label htmlFor="description" className="text-sm font-medium text-slate-700">
           Description
-          <span aria-hidden="true" className="ml-0.5 text-red-500">*</span>
+          <span aria-hidden="true" className="ml-0.5 text-red-500">
+            *
+          </span>
         </label>
         <textarea
           id="description"
@@ -85,8 +78,8 @@ export default function ProcurementRequestForm({ request }: ProcurementRequestFo
           placeholder="Describe the procurement need, objectives, and any special requirements."
           className={[
             'block w-full rounded-md border px-3 py-2 text-sm text-slate-900',
-            'placeholder:text-slate-400 transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'transition-colors placeholder:text-slate-400',
+            'focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none',
             state.fieldErrors?.description
               ? 'border-red-400 bg-red-50'
               : 'border-slate-300 bg-white',
@@ -147,7 +140,7 @@ export default function ProcurementRequestForm({ request }: ProcurementRequestFo
       {/* Required documents preview */}
       {checklist && checklist.length > 0 && (
         <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-          <p className="mb-2 text-xs font-semibold text-blue-800 uppercase tracking-wide">
+          <p className="mb-2 text-xs font-semibold tracking-wide text-blue-800 uppercase">
             Required documents for this category
           </p>
           <ul className="space-y-1">

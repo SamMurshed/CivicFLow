@@ -30,10 +30,7 @@ export interface SignInState {
  * redirects to the appropriate role dashboard.
  * On failure, returns an error message for the form.
  */
-export async function signIn(
-  _prevState: SignInState,
-  formData: FormData,
-): Promise<SignInState> {
+export async function signIn(_prevState: SignInState, formData: FormData): Promise<SignInState> {
   const email = formData.get('email');
   const password = formData.get('password');
 

@@ -21,6 +21,7 @@ CivicFlow is a fictional public-sector procurement operations platform. Four act
 Initialise a Next.js 15 App Router project with TypeScript, Tailwind CSS, ESLint, and a `src/` directory using `create-next-app`. This is the foundation every other sub-task builds on.
 
 **Expected Outcomes**
+
 - `package.json` exists with Next.js 15, React 19, TypeScript, Tailwind CSS, and ESLint as dependencies.
 - `src/app/layout.tsx` and `src/app/page.tsx` exist (App Router convention).
 - `next.config.ts` exists.
@@ -28,11 +29,13 @@ Initialise a Next.js 15 App Router project with TypeScript, Tailwind CSS, ESLint
 - `tsconfig.json` exists with `strict: true` and path alias `@/*` pointing to `src/*`.
 
 **Todo List**
+
 1. Run `npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --no-turbopack` in the workspace root (the directory already has a blank `readme.md`; the tool should not re-initialise git).
 2. Verify `tsconfig.json` has `"strict": true` under `compilerOptions`; add it if missing.
 3. Confirm `tailwind.config.ts` content array includes `./src/**/*.{ts,tsx}`.
 
 **Relevant Context**
+
 - Workspace root: `c:\Users\samin\OneDrive\Desktop\ProjBob`
 - Only `readme.md` (blank) exists today — safe to scaffold into the same directory.
 - Node 20 LTS / npm / Next.js 15 latest stable.
@@ -63,10 +66,12 @@ src/
 ```
 
 **Todo List**
+
 1. Create the above directories with `.gitkeep` placeholder files so git tracks them.
 2. Do not add any source code yet — structure only.
 
 **Relevant Context**
+
 - `src/app/` will already exist after ST-1.
 - `src/components/ui/` is intentionally separate from `src/components/` to distinguish primitives from feature-level composites.
 
@@ -80,6 +85,7 @@ src/
 Consistent formatting and a complete set of npm scripts ensure every contributor runs the same checks. This closes the gap between what `create-next-app` provides and what the acceptance criteria require.
 
 **Expected Outcomes**
+
 - `prettier`, `prettier-plugin-tailwindcss` installed as dev dependencies.
 - `.prettierrc` file present with a minimal, agreed config.
 - `.prettierignore` excludes build artefacts.
@@ -95,12 +101,14 @@ Consistent formatting and a complete set of npm scripts ensure every contributor
   - `format:check` — `prettier --check .`
 
 **Todo List**
+
 1. Install `prettier` and `prettier-plugin-tailwindcss` as dev dependencies.
 2. Create `.prettierrc` (JSON) with: `printWidth: 100`, `singleQuote: true`, `trailingComma: "all"`, `plugins: ["prettier-plugin-tailwindcss"]`.
 3. Create `.prettierignore` excluding `.next/`, `node_modules/`, and `out/`.
 4. Update `package.json` scripts to include `typecheck`, `test`, `test:watch`, `format`, and `format:check` (keep existing `dev`, `build`, `start`, `lint`).
 
 **Relevant Context**
+
 - `prettier-plugin-tailwindcss` automatically sorts Tailwind class names — important for a consistent design system later.
 - `typecheck` runs `tsc --noEmit`; Next.js ships its own `tsconfig` that includes all `src/` files.
 
@@ -114,6 +122,7 @@ Consistent formatting and a complete set of npm scripts ensure every contributor
 Next.js 15 uses Turbopack/Webpack internally; Vitest with jsdom provides a fast, Jest-compatible test runner that integrates with React Testing Library without requiring a full browser.
 
 **Expected Outcomes**
+
 - `vitest`, `@vitest/coverage-v8`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event` installed as dev dependencies.
 - `vitest.config.ts` present, pointing at `jsdom` environment and including a setup file.
 - `src/tests/setup.ts` (or `src/__tests__/setup.ts`) that imports `@testing-library/jest-dom`.
@@ -122,6 +131,7 @@ Next.js 15 uses Turbopack/Webpack internally; Vitest with jsdom provides a fast,
 - `npm run test` exits 0.
 
 **Todo List**
+
 1. Install dev dependencies: `vitest @vitest/coverage-v8 jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event`.
 2. Create `vitest.config.ts` with `environment: 'jsdom'`, `setupFiles: ['./src/__tests__/setup.ts']`, and a `resolve.alias` for the `@/` path that mirrors `tsconfig`.
 3. Create `src/__tests__/setup.ts` that imports `@testing-library/jest-dom`.
@@ -130,6 +140,7 @@ Next.js 15 uses Turbopack/Webpack internally; Vitest with jsdom provides a fast,
 6. Run `npm run test` and confirm it passes.
 
 **Relevant Context**
+
 - `vitest.config.ts` must alias `@/` → `./src/` to match Next.js path aliases, otherwise imports inside tested components will fail.
 - `@testing-library/jest-dom` extends Vitest's `expect` via the setup file import.
 
@@ -143,6 +154,7 @@ Next.js 15 uses Turbopack/Webpack internally; Vitest with jsdom provides a fast,
 The landing page is the first thing any visitor sees. It must clearly explain what CivicFlow is, who uses it, and what the workflow looks like — in plain language. Placeholder navigation links (Sign In, View Demo) must be present but not wired to any route yet.
 
 **Expected Outcomes**
+
 - `src/app/page.tsx` contains a fully accessible, responsive landing page.
 - Page includes: site name/logo text, one-line tagline, a plain-language description of the platform, a summary of the four user roles, a high-level workflow summary (submit → review → correct → approve → report), and two CTAs: **Sign In** (`href="/sign-in"`) and **View Demo** (`href="/demo"`).
 - `/sign-in` and `/demo` routes do NOT exist yet — links are intentional placeholders.
@@ -151,6 +163,7 @@ The landing page is the first thing any visitor sees. It must clearly explain wh
 - No external UI library is used — plain Tailwind only.
 
 **Todo List**
+
 1. Update `src/app/layout.tsx`: set `title: 'CivicFlow'`, add a meta description, keep the existing font/body setup but remove any boilerplate Next.js demo content.
 2. Replace the contents of `src/app/page.tsx` with the landing page:
    - `<header>` with logo text and nav containing Sign In and View Demo links.
@@ -160,6 +173,7 @@ The landing page is the first thing any visitor sees. It must clearly explain wh
 4. Confirm the page renders at `localhost:3000` when `npm run dev` runs.
 
 **Relevant Context**
+
 - The four roles: Vendor, Agency User, Procurement Analyst, Administrator.
 - The five workflow stages: Submit → Review → Correct → Approve → Report.
 - Accessibility: use `<nav>`, `<main>`, `<header>`, `<footer>` landmarks; links need `aria-label` if icon-only (none here); Tailwind's `focus:ring` on interactive elements.
@@ -174,12 +188,14 @@ The landing page is the first thing any visitor sees. It must clearly explain wh
 Define the expected environment variable surface now, before any secrets are introduced, so contributors always know which variables to provide.
 
 **Expected Outcomes**
+
 - `.env.example` exists with commented placeholder keys for anticipated variables (Supabase URL, Supabase anon key, app URL) — no real values.
 - `.env.local` is listed in `.gitignore` (and is not committed).
 - `.gitignore` covers standard Next.js, Node, OS, and editor artefacts.
 - No secrets or real data appear anywhere in the repository.
 
 **Todo List**
+
 1. Check whether `create-next-app` already generated a `.gitignore`; if so, verify it includes `.env*.local`. Add any missing patterns (`.env.local`, `.env.development.local`, `*.log`, `.DS_Store`, `.idea/`, `.vscode/` except `extensions.json`).
 2. Create `.env.example`:
    ```
@@ -193,6 +209,7 @@ Define the expected environment variable surface now, before any secrets are int
 3. Confirm `.env.local` does NOT exist (nothing to leak).
 
 **Relevant Context**
+
 - `create-next-app` generates a `.gitignore` that already covers most Next.js artefacts; this sub-task audits and extends it.
 - Supabase keys are the only anticipated secret surface for Task 1+.
 
@@ -206,12 +223,14 @@ Define the expected environment variable surface now, before any secrets are int
 The README is the authoritative onboarding document. It must describe purpose, users, workflow, stack, local commands, and the synthetic-data restriction as required by the acceptance criteria.
 
 **Expected Outcomes**
+
 - `README.md` (replaces the current blank `readme.md`) contains all required sections.
 - Sections: Project Purpose, Planned Users (four roles), Proposed Workflow, Technology Stack, Local Development Commands, Synthetic-Data Restriction.
 - All `npm run` commands match what was configured in ST-3.
 - No placeholder text left unfilled.
 
 **Todo List**
+
 1. Delete (overwrite) the existing blank `readme.md` with a new `README.md` containing all required sections.
 2. Sections must include:
    - **Project Purpose** — what CivicFlow is and the problem it solves.
@@ -222,6 +241,7 @@ The README is the authoritative onboarding document. It must describe purpose, u
    - **Synthetic-Data Restriction** — explicit statement that no real procurement data, vendor names, personal information, or government data may be committed; all test fixtures must be clearly fictional.
 
 **Relevant Context**
+
 - The blank `readme.md` at the root is the only existing file before scaffolding.
 - After ST-1, `create-next-app` may generate its own `README.md`; this sub-task overwrites it entirely.
 
@@ -235,6 +255,7 @@ The README is the authoritative onboarding document. It must describe purpose, u
 Run every acceptance-criteria check in sequence and confirm all five pass cleanly before declaring Task 0 complete.
 
 **Expected Outcomes**
+
 - `npm run dev` starts without errors.
 - `npm run lint` exits 0 with no warnings.
 - `npm run typecheck` exits 0.
@@ -244,6 +265,7 @@ Run every acceptance-criteria check in sequence and confirm all five pass cleanl
 - No secrets or real data present anywhere.
 
 **Todo List**
+
 1. Run `npm run lint` — fix any ESLint errors (likely unused imports from scaffold boilerplate).
 2. Run `npm run typecheck` — fix any type errors.
 3. Run `npm run test` — confirm smoke test passes.
@@ -252,6 +274,7 @@ Run every acceptance-criteria check in sequence and confirm all five pass cleanl
 6. `grep` the repo for any strings that look like real keys, emails, or personal data — confirm none found.
 
 **Relevant Context**
+
 - Build may fail if any `page.tsx` uses client-only APIs without `"use client"` directive.
 - ESLint config from `create-next-app` uses `eslint-config-next`; no custom rules needed yet.
 

@@ -10,9 +10,7 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { vendorOrgProfileSchema, vendorStatusSchema } from '@/validation/vendor-profile';
-import {
-  calcProfileCompleteness,
-} from '@/lib/vendor-profile-completeness';
+import { calcProfileCompleteness } from '@/lib/vendor-profile-completeness';
 import type { VendorOrgProfile } from '@/types/database';
 import type { Profile, Organization, AppRole } from '@/types/database';
 

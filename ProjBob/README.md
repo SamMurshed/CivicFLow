@@ -16,12 +16,12 @@ The platform models the journey from initial submission through structured revie
 
 ## Planned Users
 
-| Role | Responsibilities |
-|---|---|
-| **Vendor** | Maintains a vendor profile, submits requested information and documents, responds to correction items raised by analysts, and tracks the status of procurement requests they are attached to. |
-| **Agency User** | Creates procurement requests, selects and attaches a vendor, supplies project details and budget information, and responds to questions or correction requests raised by procurement analysts. |
-| **Procurement Analyst** | Reviews submissions against a defined checklist, requests corrections from vendors or agency users, records review actions and notes, and issues a final approve or reject decision. |
-| **Administrator** | Manages organisations, users, checklist templates, and knowledge articles. Views system-wide reporting and audit trails across all requests and decisions. |
+| Role                    | Responsibilities                                                                                                                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vendor**              | Maintains a vendor profile, submits requested information and documents, responds to correction items raised by analysts, and tracks the status of procurement requests they are attached to.  |
+| **Agency User**         | Creates procurement requests, selects and attaches a vendor, supplies project details and budget information, and responds to questions or correction requests raised by procurement analysts. |
+| **Procurement Analyst** | Reviews submissions against a defined checklist, requests corrections from vendors or agency users, records review actions and notes, and issues a final approve or reject decision.           |
+| **Administrator**       | Manages organisations, users, checklist templates, and knowledge articles. Views system-wide reporting and audit trails across all requests and decisions.                                     |
 
 ---
 
@@ -37,30 +37,34 @@ The platform models the journey from initial submission through structured revie
 
 ## Technology Stack
 
-| Technology | Role |
-|---|---|
-| **Next.js 16 — App Router** | Full-stack React framework; all pages use the App Router convention under `src/app/`. |
-| **TypeScript (strict mode)** | Statically typed throughout; `tsconfig.json` has `"strict": true`. |
-| **Tailwind CSS v4** | Utility-first styling; no external component library is used. |
-| **Vitest + React Testing Library** | Fast unit and component testing with jsdom; replaces Jest. |
-| **Prettier** | Automatic code formatting with `prettier-plugin-tailwindcss` for class sorting. |
-| **Supabase** | Backend database and auth (`@supabase/supabase-js` + `@supabase/ssr`). Browser and server clients are wired up; credentials are supplied via `.env.local`. |
+| Technology                         | Role                                                                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Next.js 16 — App Router**        | Full-stack React framework; all pages use the App Router convention under `src/app/`.                                                                      |
+| **TypeScript (strict mode)**       | Statically typed throughout; `tsconfig.json` has `"strict": true`.                                                                                         |
+| **Tailwind CSS v4**                | Utility-first styling; no external component library is used.                                                                                              |
+| **Vitest + React Testing Library** | Fast unit and component testing with jsdom; replaces Jest.                                                                                                 |
+| **Prettier**                       | Automatic code formatting with `prettier-plugin-tailwindcss` for class sorting.                                                                            |
+| **Supabase**                       | Backend database and auth (`@supabase/supabase-js` + `@supabase/ssr`). Browser and server clients are wired up; credentials are supplied via `.env.local`. |
+| **Zod**                            | Server-side validation for all workflow mutations and user input.                                                                                          |
+| **Playwright**                     | Browser smoke tests, with an optional authenticated demo-account flow.                                                                                     |
+| **GitHub Actions**                 | Automated lint, type-check, unit, build, and browser-test validation.                                                                                      |
 
 ---
 
 ## Local Development Commands
 
-| Script | Command | Description |
-|---|---|---|
-| `dev` | `npm run dev` | Start the Next.js development server at `http://localhost:3000`. |
-| `build` | `npm run build` | Compile a production build. |
-| `start` | `npm run start` | Start the production server (requires a prior `build`). |
-| `lint` | `npm run lint` | Run ESLint via `next lint`. |
-| `typecheck` | `npm run typecheck` | Run TypeScript compiler check without emitting files (`tsc --noEmit`). |
-| `test` | `npm run test` | Run the full Vitest test suite once. |
-| `test:watch` | `npm run test:watch` | Run Vitest in interactive watch mode. |
-| `format` | `npm run format` | Format all files with Prettier. |
-| `format:check` | `npm run format:check` | Check formatting without writing changes (useful in CI). |
+| Script         | Command                | Description                                                            |
+| -------------- | ---------------------- | ---------------------------------------------------------------------- |
+| `dev`          | `npm run dev`          | Start the Next.js development server at `http://localhost:3000`.       |
+| `build`        | `npm run build`        | Compile a production build.                                            |
+| `start`        | `npm run start`        | Start the production server (requires a prior `build`).                |
+| `lint`         | `npm run lint`         | Run ESLint via `next lint`.                                            |
+| `typecheck`    | `npm run typecheck`    | Run TypeScript compiler check without emitting files (`tsc --noEmit`). |
+| `test`         | `npm run test`         | Run the full Vitest test suite once.                                   |
+| `test:watch`   | `npm run test:watch`   | Run Vitest in interactive watch mode.                                  |
+| `test:e2e`     | `npm run test:e2e`     | Run Playwright browser tests.                                          |
+| `format`       | `npm run format`       | Format all files with Prettier.                                        |
+| `format:check` | `npm run format:check` | Check formatting without writing changes (useful in CI).               |
 
 ### Quick start
 
@@ -115,15 +119,16 @@ CivicFlow uses a Supabase (PostgreSQL) relational database. Migrations live in `
 
 ### Migrations
 
-| File | Description |
-|---|---|
-| `001_extensions_and_enums.sql` | Enables `pgcrypto`; defines `app_role`, `org_kind`, `request_status`, `checklist_item_status`, `document_status`, and `review_decision` enum types. |
-| `002_core_tables.sql` | Creates `organizations`, `profiles`, and `vendor_profiles`; adds the `set_updated_at()` trigger function. |
-| `003_procurement_tables.sql` | Creates `procurement_requests`, `checklist_templates`, `checklist_template_items`, `request_checklist_items`, and `request_documents`. |
-| `004_workflow_tables.sql` | Creates `comments`, `review_actions`, `status_history`, and `activity_log`; append-only tables have PostgreSQL rules that silently block UPDATE and DELETE. |
-| `005_supporting_tables.sql` | Creates `notifications`, `knowledge_articles`, and `feedback_items`. |
-| `006_indexes.sql` | Creates indexes for the most common query filters: status, agency, vendor, analyst, category, deadline, and created date. |
-| `007_rls_policies.sql` | Enables Row Level Security on every table and defines per-role access policies. |
+| File                               | Description                                                                                                                                                 |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `001_extensions_and_enums.sql`     | Enables `pgcrypto`; defines `app_role`, `org_kind`, `request_status`, `checklist_item_status`, `document_status`, and `review_decision` enum types.         |
+| `002_core_tables.sql`              | Creates `organizations`, `profiles`, and `vendor_profiles`; adds the `set_updated_at()` trigger function.                                                   |
+| `003_procurement_tables.sql`       | Creates `procurement_requests`, `checklist_templates`, `checklist_template_items`, `request_checklist_items`, and `request_documents`.                      |
+| `004_workflow_tables.sql`          | Creates `comments`, `review_actions`, `status_history`, and `activity_log`; append-only tables have PostgreSQL rules that silently block UPDATE and DELETE. |
+| `005_supporting_tables.sql`        | Creates `notifications`, `knowledge_articles`, and `feedback_items`.                                                                                        |
+| `006_indexes.sql`                  | Creates indexes for the most common query filters: status, agency, vendor, analyst, category, deadline, and created date.                                   |
+| `007_rls_policies.sql`             | Enables Row Level Security on every table and defines per-role access policies.                                                                             |
+| `008_private_document_storage.sql` | Creates the private document bucket and request-scoped Storage policies.                                                                                    |
 
 ### Key Design Decisions
 
@@ -134,23 +139,23 @@ CivicFlow uses a Supabase (PostgreSQL) relational database. Migrations live in `
 
 ### Tables at a Glance
 
-| Table | Purpose |
-|---|---|
-| `organizations` | Both agency and vendor organisations. `kind` column distinguishes them. |
-| `profiles` | One row per authenticated user; carries `app_role` and links to an organisation. |
-| `vendor_profiles` | Extended vendor metadata (business number, categories, verification status). |
-| `procurement_requests` | Central fact table; tracks the full lifecycle from `draft` to `approved`/`rejected`. |
-| `checklist_templates` | Reusable analyst review checklists managed by admins. |
-| `checklist_template_items` | Individual items within a checklist template. |
-| `request_checklist_items` | Live per-request copy of checklist items; mutated by analysts during review. |
-| `request_documents` | Metadata for files uploaded to a request (file stored in Supabase Storage). |
-| `comments` | Threaded discussion on a request; `is_internal` flags analyst-only notes. |
-| `review_actions` | Immutable log of every formal analyst decision (approve, reject, flag, etc.). |
-| `status_history` | Append-only record of every status transition. |
-| `activity_log` | Append-only structured audit log for all significant application events. |
-| `notifications` | In-app notifications for individual users. |
-| `knowledge_articles` | Help-centre articles managed by admins. |
-| `feedback_items` | User ratings and comments on articles or requests. |
+| Table                      | Purpose                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `organizations`            | Both agency and vendor organisations. `kind` column distinguishes them.              |
+| `profiles`                 | One row per authenticated user; carries `app_role` and links to an organisation.     |
+| `vendor_profiles`          | Extended vendor metadata (business number, categories, verification status).         |
+| `procurement_requests`     | Central fact table; tracks the full lifecycle from `draft` to `approved`/`rejected`. |
+| `checklist_templates`      | Reusable analyst review checklists managed by admins.                                |
+| `checklist_template_items` | Individual items within a checklist template.                                        |
+| `request_checklist_items`  | Live per-request copy of checklist items; mutated by analysts during review.         |
+| `request_documents`        | Metadata for files uploaded to a request (file stored in Supabase Storage).          |
+| `comments`                 | Threaded discussion on a request; `is_internal` flags analyst-only notes.            |
+| `review_actions`           | Immutable log of every formal analyst decision (approve, reject, flag, etc.).        |
+| `status_history`           | Append-only record of every status transition.                                       |
+| `activity_log`             | Append-only structured audit log for all significant application events.             |
+| `notifications`            | In-app notifications for individual users.                                           |
+| `knowledge_articles`       | Help-centre articles managed by admins.                                              |
+| `feedback_items`           | User ratings and comments on articles or requests.                                   |
 
 ### Request Status Lifecycle
 
@@ -195,12 +200,12 @@ seed profile rows.
 
 ### Four demo accounts
 
-| Role | Email | Supabase Auth password |
-|---|---|---|
-| **Administrator** | `admin@civicflow.example` | `Demo1234!` |
-| **Procurement Analyst** | `analyst.morgan@civicflow.example` | `Demo1234!` |
-| **Agency User** | `agency.thornton@northdale.example` | `Demo1234!` |
-| **Vendor** | `vendor.chen@apex.example` | `Demo1234!` |
+| Role                    | Email                               | Supabase Auth password |
+| ----------------------- | ----------------------------------- | ---------------------- |
+| **Administrator**       | `admin@civicflow.example`           | `Demo1234!`            |
+| **Procurement Analyst** | `analyst.morgan@civicflow.example`  | `Demo1234!`            |
+| **Agency User**         | `agency.thornton@northdale.example` | `Demo1234!`            |
+| **Vendor**              | `vendor.chen@apex.example`          | `Demo1234!`            |
 
 > ⚠️ These passwords are fictional demonstration values. Change them before connecting to any
 > real environment.
@@ -256,12 +261,12 @@ See `supabase/scripts/create_demo_passwords.sql` for the password-update stateme
 
 Each role lands on its own dashboard immediately after signing in:
 
-| Role | Dashboard path |
-|---|---|
-| Vendor | `/vendor/dashboard` |
-| Agency User | `/agency/dashboard` |
+| Role                | Dashboard path       |
+| ------------------- | -------------------- |
+| Vendor              | `/vendor/dashboard`  |
+| Agency User         | `/agency/dashboard`  |
 | Procurement Analyst | `/analyst/dashboard` |
-| Administrator | `/admin/dashboard` |
+| Administrator       | `/admin/dashboard`   |
 
 ---
 
@@ -277,4 +282,43 @@ Each role lands on its own dashboard immediately after signing in:
 
 ---
 
-*CivicFlow is a fictional demonstration platform. Any resemblance to real procurement systems, agencies, vendors, or processes is coincidental.*
+## Implemented Capabilities
+
+- Agency draft creation, category-driven requirements, private file upload, completeness validation, submission, correction, and resubmission
+- Analyst queue filters, request claiming, document review, checklist findings, internal/public comments, corrections, holds, approval, and rejection
+- In-app notifications plus immutable status, review, and activity records
+- Role-aware operational reporting with filters, accessible visual summaries, and formula-safe CSV export
+- Searchable procurement, compliance, grant, and disaster-recovery guidance with feedback collection
+- Role-based navigation containing only implemented destinations
+
+## Architecture, Security, and Demonstration
+
+- [Architecture and workflow diagrams](docs/ARCHITECTURE.md)
+- [Security model and limitations](docs/SECURITY.md)
+- [Free-tier deployment and rollback guide](docs/DEPLOYMENT.md)
+- [Three-to-five-minute recruiter demo](docs/DEMO.md)
+
+## Test Strategy
+
+- **Vitest:** validation, authorization helpers, workflow transitions, checklist behavior, metrics, CSV security, navigation, and reusable UI components
+- **Playwright:** public navigation and keyboard smoke coverage; an authenticated role-dashboard check runs when demo credentials are configured
+- **GitHub Actions:** installs from the lockfile and runs lint, TypeScript, unit tests, production build, and Chromium smoke tests on pushes and pull requests
+- **Manual Supabase verification:** use `supabase/scripts/verify_rls.sql`, then execute the full agency-to-analyst workflow because hosted authentication and Storage require a configured test project
+
+## Current Limitations
+
+- CivicFlow is a portfolio demonstration with synthetic data; it is not connected to a government procurement system.
+- Deployment requires the repository owner to provision free Supabase and Vercel projects and supply public environment values.
+- The project does not claim compliance certification, production monitoring, malware scanning, or enterprise disaster-recovery controls.
+- Lightweight cooldowns reduce duplicate comments and feedback but are not distributed rate limiting.
+
+## Roadmap
+
+- Add administrator interfaces for users, organizations, and checklist templates
+- Add optional vendor-side correction workflows and richer assignment controls
+- Add authenticated Playwright fixtures backed by a dedicated Supabase test project
+- Add portfolio screenshots after the public deployment URL is available
+
+---
+
+_CivicFlow is a fictional demonstration platform. Any resemblance to real procurement systems, agencies, vendors, or processes is coincidental._

@@ -13,9 +13,7 @@ export default async function AdminDashboardPage() {
     <div>
       {/* Page heading */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900">
-          Welcome back, {user.profile.full_name}
-        </h1>
+        <h1 className="text-xl font-bold text-slate-900">Welcome back, {user.profile.full_name}</h1>
         <p className="mt-0.5 text-sm text-slate-500">Administrator</p>
       </div>
 
@@ -66,7 +64,9 @@ export default async function AdminDashboardPage() {
       {/* Status breakdown */}
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">System-wide Request Status Breakdown</h2>
+          <h2 className="text-sm font-semibold text-slate-900">
+            System-wide Request Status Breakdown
+          </h2>
         </div>
         <div className="divide-y divide-slate-100">
           {(
@@ -83,7 +83,7 @@ export default async function AdminDashboardPage() {
           ).map(({ status, count }) => (
             <div key={status} className="flex items-center justify-between px-5 py-2.5">
               <StatusBadge status={status} dot />
-              <span className="text-sm font-semibold tabular-nums text-slate-700">{count}</span>
+              <span className="text-sm font-semibold text-slate-700 tabular-nums">{count}</span>
             </div>
           ))}
         </div>

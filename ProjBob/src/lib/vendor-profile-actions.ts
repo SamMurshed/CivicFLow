@@ -12,7 +12,11 @@
 
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/dal';
-import { getVendorOrgProfile, upsertVendorOrgProfile, setVendorOrgActive } from '@/db/vendor-profile';
+import {
+  getVendorOrgProfile,
+  upsertVendorOrgProfile,
+  setVendorOrgActive,
+} from '@/db/vendor-profile';
 import { vendorOrgProfileSchema, vendorStatusSchema } from '@/validation/vendor-profile';
 import { logEvent } from '@/lib/activity-log';
 import type { VendorOrgProfile } from '@/types/database';

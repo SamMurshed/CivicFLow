@@ -24,7 +24,7 @@ export default function Sidebar({ sections }: SidebarProps) {
       {sections.map((section, si) => (
         <div key={si}>
           {section.title && (
-            <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <p className="mb-1 px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase">
               {section.title}
             </p>
           )}
@@ -48,9 +48,7 @@ export default function Sidebar({ sections }: SidebarProps) {
                   >
                     <NavIcon path={item.iconPath} />
                     {item.label}
-                    {isActive && (
-                      <span className="sr-only">(current page)</span>
-                    )}
+                    {isActive && <span className="sr-only">(current page)</span>}
                   </Link>
                 </li>
               );

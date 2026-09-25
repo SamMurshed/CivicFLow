@@ -30,9 +30,7 @@ export default function ReviewDecisionForm({ requestId, currentStatus }: Props) 
   const allowedDecisions = ALLOWED_TRANSITIONS[currentStatus] ?? [];
 
   if (allowedDecisions.length === 0) {
-    return (
-      <p className="text-xs text-slate-500">No actions available for the current status.</p>
-    );
+    return <p className="text-xs text-slate-500">No actions available for the current status.</p>;
   }
 
   return (
@@ -59,7 +57,7 @@ export default function ReviewDecisionForm({ requestId, currentStatus }: Props) 
             name="decision"
             id="decision"
             required
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="">Select a decision…</option>
             {REVIEW_DECISIONS.filter((d) => allowedDecisions.includes(d)).map((d) => (
@@ -87,7 +85,7 @@ export default function ReviewDecisionForm({ requestId, currentStatus }: Props) 
             placeholder="Enter rationale or correction details…"
             className={[
               'block w-full rounded-md border px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400',
-              'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500',
+              'focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none',
               state.fieldErrors?.note ? 'border-red-400 bg-red-50' : 'border-slate-300',
             ].join(' ')}
           />

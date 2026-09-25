@@ -126,7 +126,9 @@ export async function listRequests(params: RequestListParams = {}): Promise<Requ
     .select('id, name')
     .in('id', agencyIds);
 
-  const agencyMap = new Map((agencies ?? []).map((a: { id: string; name: string }) => [a.id, a.name]));
+  const agencyMap = new Map(
+    (agencies ?? []).map((a: { id: string; name: string }) => [a.id, a.name]),
+  );
 
   const requests: RequestWithMeta[] = data.map((r) => ({
     ...r,
@@ -175,7 +177,9 @@ export async function listAnalystQueue(params: RequestListParams = {}): Promise<
     .select('id, name')
     .in('id', agencyIds);
 
-  const agencyMap = new Map((agencies ?? []).map((a: { id: string; name: string }) => [a.id, a.name]));
+  const agencyMap = new Map(
+    (agencies ?? []).map((a: { id: string; name: string }) => [a.id, a.name]),
+  );
 
   const requests: RequestWithMeta[] = data.map((r) => ({
     ...r,

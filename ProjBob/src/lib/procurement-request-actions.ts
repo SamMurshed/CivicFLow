@@ -16,6 +16,7 @@
  */
 
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { requireRole } from '@/lib/auth/dal';
 import { createClient } from '@/lib/supabase/server';
 import { logEvent } from '@/lib/activity-log';
@@ -23,7 +24,7 @@ import { notify } from '@/lib/notifications';
 import {
   procurementRequestSchema,
   getChecklistForCategory,
-  SUBMIT_TARGET_STATUS,
+  getSubmissionTargetStatus,
 } from '@/validation/procurement-request';
 import type { ActionState } from '@/lib/vendor-profile-actions';
 import type { RequestStatus } from '@/types/database';
@@ -113,7 +114,11 @@ export async function createRequest(
     .single();
 
   if (error || !req) {
-    return { success: false, error: 'Failed to create request. Please try again.', fieldErrors: {} };
+    return {
+      success: false,
+      error: 'Failed to create request. Please try again.',
+      fieldErrors: {},
+    };
   }
 
   // Seed the checklist from category template
@@ -249,6 +254,8 @@ export async function updateRequest(
     entity_id: requestId,
   });
 
+  revalidatePath(`/agency/requests/${requestId}`);
+
   return { success: true, error: null, fieldErrors: {} };
 }
 
@@ -256,7 +263,7 @@ export async function updateRequest(
 
 /**
  * Submits a draft or correction-pending request for analyst review.
- * Blocks if required checklist items are pending.
+ * Blocks if any required checklist item has no current document attached.
  */
 export async function submitRequest(
   _prevState: ActionState,
@@ -294,31 +301,40 @@ export async function submitRequest(
     };
   }
 
-  // Check required checklist items
-  const { data: checklistItems } = await supabase
-    .from('request_checklist_items')
-    .select('*')
-    .eq('request_id', requestId);
+  const [{ data: checklistItems }, { data: documents }] = await Promise.all([
+    supabase.from('request_checklist_items').select('id, is_required').eq('request_id', requestId),
+    supabase
+      .from('request_documents')
+      .select('checklist_item_id, status')
+      .eq('request_id', requestId)
+      .in('status', ['uploaded', 'accepted']),
+  ]);
 
-  const requiredPending = (checklistItems ?? []).filter(
-    (item: { is_required: boolean; status: string }) =>
-      item.is_required && item.status === 'pending',
+  const documentedItemIds = new Set(
+    (documents ?? [])
+      .map((document: { checklist_item_id: string | null }) => document.checklist_item_id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const missingRequired = (checklistItems ?? []).filter(
+    (item: { id: string; is_required: boolean }) =>
+      item.is_required && !documentedItemIds.has(item.id),
   );
 
-  if (requiredPending.length > 0) {
+  if (missingRequired.length > 0) {
     return {
       success: false,
-      error: `${requiredPending.length} required checklist item${requiredPending.length > 1 ? 's are' : ' is'} still pending. Please attach the required documents first.`,
+      error: `${missingRequired.length} required document${missingRequired.length > 1 ? 's are' : ' is'} still missing. Attach a document to every required checklist item before submitting.`,
       fieldErrors: {},
     };
   }
 
   const fromStatus = existing.status as RequestStatus;
+  const targetStatus = getSubmissionTargetStatus(fromStatus);
 
   const { error: updateErr } = await supabase
     .from('procurement_requests')
     .update({
-      status: SUBMIT_TARGET_STATUS,
+      status: targetStatus,
       submitted_at: new Date().toISOString(),
     })
     .eq('id', requestId);
@@ -331,14 +347,14 @@ export async function submitRequest(
     };
   }
 
-  await recordStatusTransition(requestId, user.id, fromStatus, SUBMIT_TARGET_STATUS);
+  await recordStatusTransition(requestId, user.id, fromStatus, targetStatus);
 
   await logEvent({
     actor_id: user.id,
     event_type: 'procurement_request.submitted',
     entity_type: 'procurement_request',
     entity_id: requestId,
-    metadata: { from_status: fromStatus },
+    metadata: { from_status: fromStatus, to_status: targetStatus },
   });
 
   // Notify assigned analyst if any
@@ -388,7 +404,11 @@ export async function withdrawRequest(
     return { success: false, error: 'Access denied.', fieldErrors: {} };
   }
 
-  const withdrawableStatuses: RequestStatus[] = ['submitted', 'under_review', 'awaiting_correction'];
+  const withdrawableStatuses: RequestStatus[] = [
+    'submitted',
+    'under_review',
+    'awaiting_correction',
+  ];
   if (!withdrawableStatuses.includes(existing.status as RequestStatus)) {
     return {
       success: false,
@@ -412,7 +432,13 @@ export async function withdrawRequest(
     };
   }
 
-  await recordStatusTransition(requestId, user.id, fromStatus, 'withdrawn', 'Withdrawn by applicant');
+  await recordStatusTransition(
+    requestId,
+    user.id,
+    fromStatus,
+    'withdrawn',
+    'Withdrawn by applicant',
+  );
 
   await logEvent({
     actor_id: user.id,
@@ -420,6 +446,9 @@ export async function withdrawRequest(
     entity_type: 'procurement_request',
     entity_id: requestId,
   });
+
+  revalidatePath(`/agency/requests/${requestId}`);
+  revalidatePath('/agency/requests');
 
   return { success: true, error: null, fieldErrors: {} };
 }

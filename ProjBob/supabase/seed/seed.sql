@@ -53,8 +53,10 @@ set local role postgres;
 \set tmpl_it          '''c0000001-0000-0000-0000-000000000002'''
 
 -- Knowledge articles
-\set ka_howto_submit  '''k0000001-0000-0000-0000-000000000001'''
-\set ka_checklist_guide '''k0000001-0000-0000-0000-000000000002'''
+\set ka_howto_submit  '''b0000001-0000-0000-0000-000000000001'''
+\set ka_checklist_guide '''b0000001-0000-0000-0000-000000000002'''
+\set ka_grant_compliance '''b0000001-0000-0000-0000-000000000003'''
+\set ka_disaster_recovery '''b0000001-0000-0000-0000-000000000004'''
 
 -- Requests
 \set req_draft        '''e0000001-0000-0000-0000-000000000001'''
@@ -202,6 +204,26 @@ insert into public.knowledge_articles (id, title, slug, body, category, tags, is
    array['checklist', 'review', 'corrections'],
    true,
    now() - interval '45 days',
+   :user_admin),
+
+  (:ka_grant_compliance,
+   'Grant and Compliance Documentation Basics',
+   'grant-compliance-documentation-basics',
+   E'## Build a Reviewable File\n\nKeep the approved scope, budget, procurement record, invoice, proof of payment, and delivery evidence together. Use consistent project identifiers across every document.\n\n## Reconcile Before Submission\n\nConfirm that each cost is within the approved period and scope, supported by documentation, and assigned to the correct funding stream. Record discrepancies and corrective actions instead of overwriting the original record.\n\n## Protect the Audit Trail\n\nDocument who reviewed each item, when the review occurred, what changed, and why. Escalate unclear requirements before a deadline is at risk.',
+   'Grants & Compliance',
+   array['grants', 'compliance', 'invoices', 'audit'],
+   true,
+   now() - interval '30 days',
+   :user_admin),
+
+  (:ka_disaster_recovery,
+   'Disaster-Recovery Project Record Checklist',
+   'disaster-recovery-project-record-checklist',
+   E'## Preserve the Project Story\n\nMaintain the damage description, approved scope of work, location, cost estimate, contracts, invoices, proof of payment, insurance information, and progress evidence in one project record.\n\n## Track Changes\n\nWhen scope, schedule, or cost changes, record the reason, approval path, and supporting files. Keep prior versions available for audit review.\n\n## Review for Reimbursement\n\nBefore requesting reimbursement, reconcile claimed costs to the approved work and flag insurance or duplicate-funding questions for specialist review. This demonstration guidance is educational and does not replace current grant rules.',
+   'Disaster Recovery',
+   array['disaster recovery', 'grants', 'insurance', 'reimbursement'],
+   true,
+   now() - interval '15 days',
    :user_admin)
 on conflict (id) do nothing;
 

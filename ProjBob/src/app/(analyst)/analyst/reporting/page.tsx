@@ -1,0 +1,26 @@
+import ReportingDashboard from '@/components/reporting/ReportingDashboard';
+import { requireRole } from '@/lib/auth/dal';
+
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+function value(input: string | string[] | undefined): string | undefined {
+  return typeof input === 'string' && input.length > 0 ? input : undefined;
+}
+
+export default async function AnalystReportingPage({ searchParams }: PageProps) {
+  await requireRole('analyst');
+  const params = await searchParams;
+  return (
+    <ReportingDashboard
+      pagePath="/analyst/reporting"
+      filters={{
+        status: value(params.status),
+        category: value(params.category),
+        dateFrom: value(params.dateFrom),
+        dateTo: value(params.dateTo),
+      }}
+    />
+  );
+}

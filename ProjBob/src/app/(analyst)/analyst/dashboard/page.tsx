@@ -88,7 +88,7 @@ export default async function AnalystDashboardPage() {
               <Link
                 key={req.id}
                 href={`/analyst/queue/${req.id}`}
-                className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-slate-50"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-slate-800">{req.title}</p>

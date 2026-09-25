@@ -61,9 +61,7 @@ export default function Dialog({
     const focusableSelectors =
       'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
-    const focusable = Array.from(
-      dialog.querySelectorAll<HTMLElement>(focusableSelectors),
-    );
+    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelectors));
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
 
@@ -117,10 +115,7 @@ export default function Dialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className={[
-          'relative w-full rounded-xl bg-white shadow-xl',
-          SIZE_CLASS[size],
-        ].join(' ')}
+        className={['relative w-full rounded-xl bg-white shadow-xl', SIZE_CLASS[size]].join(' ')}
       >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
@@ -139,7 +134,7 @@ export default function Dialog({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="ml-4 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="ml-4 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -170,8 +165,6 @@ interface DialogActionsProps {
 
 export function DialogActions({ children }: DialogActionsProps) {
   return (
-    <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">
-      {children}
-    </div>
+    <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-4">{children}</div>
   );
 }

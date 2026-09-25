@@ -42,7 +42,7 @@ export default function TopBar({
           {/* Hamburger (mobile only) */}
           <button
             type="button"
-            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 lg:hidden"
+            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none lg:hidden"
             aria-label="Open navigation menu"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav-dialog"
@@ -79,10 +79,8 @@ export default function TopBar({
           <div className="ml-auto flex items-center gap-4">
             {/* User info (hidden on very small screens) */}
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium leading-tight text-slate-900">{userName}</p>
-              <p className="text-xs leading-tight text-slate-500">
-                {orgName ?? roleLabel}
-              </p>
+              <p className="text-sm leading-tight font-medium text-slate-900">{userName}</p>
+              <p className="text-xs leading-tight text-slate-500">{orgName ?? roleLabel}</p>
             </div>
 
             {/* Avatar */}
@@ -97,7 +95,7 @@ export default function TopBar({
             <form action={signOut}>
               <button
                 type="submit"
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 Sign out
               </button>
@@ -107,11 +105,7 @@ export default function TopBar({
       </header>
 
       {/* Mobile nav drawer */}
-      <MobileNav
-        sections={navSections}
-        isOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-      />
+      <MobileNav sections={navSections} isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
     </>
   );
 }

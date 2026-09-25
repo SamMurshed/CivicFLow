@@ -33,17 +33,13 @@ export default function Select({
   const selectId = id ?? name ?? label.toLowerCase().replace(/\s+/g, '-');
   const descId = description ? `${selectId}-desc` : undefined;
   const errorId = error ? `${selectId}-error` : undefined;
-  const ariaDescribedBy =
-    [descId, errorId].filter(Boolean).join(' ') || undefined;
+  const ariaDescribedBy = [descId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className="flex flex-col gap-1">
       <label
         htmlFor={selectId}
-        className={[
-          'text-sm font-medium text-slate-700',
-          srOnlyLabel ? 'sr-only' : '',
-        ]
+        className={['text-sm font-medium text-slate-700', srOnlyLabel ? 'sr-only' : '']
           .filter(Boolean)
           .join(' ')}
       >
@@ -69,12 +65,10 @@ export default function Select({
         aria-invalid={error ? 'true' : undefined}
         className={[
           'block w-full rounded-md border px-3 py-2 text-sm text-slate-900',
-          'transition-colors appearance-none bg-white',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+          'appearance-none bg-white transition-colors',
+          'focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none',
           'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
-          error
-            ? 'border-red-400 bg-red-50 focus:ring-red-400'
-            : 'border-slate-300',
+          error ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-slate-300',
           className,
         ]
           .filter(Boolean)

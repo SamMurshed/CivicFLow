@@ -214,7 +214,10 @@ create policy "procurement_requests: update"
     (public.current_role_name() = 'agency_user'
       and agency_org_id = public.current_org_id()
       and status in ('draft', 'awaiting_correction'))
-    or (public.current_role_name() = 'analyst' and assigned_analyst = auth.uid())
+    or (public.current_role_name() = 'analyst' and (
+      assigned_analyst = auth.uid()
+      or (assigned_analyst is null and status in ('submitted', 'correction_submitted'))
+    ))
     or public.current_role_name() = 'admin'
   )
   with check (
@@ -474,11 +477,26 @@ create policy "notifications: recipients read own"
   to authenticated
   using (recipient_id = auth.uid());
 
--- Application (service role) inserts notifications; admins too
-create policy "notifications: admins insert"
+-- Workflow participants can notify another participant on an accessible request.
+create policy "notifications: workflow participants insert"
   on public.notifications for insert
   to authenticated
-  with check (public.current_role_name() = 'admin' or recipient_id = auth.uid());
+  with check (
+    public.current_role_name() = 'admin'
+    or recipient_id = auth.uid()
+    or (
+      notifications.request_id in (select id from public.procurement_requests)
+      and recipient_id in (
+        select pr.submitted_by
+        from public.procurement_requests pr
+        where pr.id = notifications.request_id
+        union
+        select pr.assigned_analyst
+        from public.procurement_requests pr
+        where pr.id = notifications.request_id
+      )
+    )
+  );
 
 -- Users can mark their own notifications as read
 create policy "notifications: recipients update own"

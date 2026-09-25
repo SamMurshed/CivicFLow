@@ -11,6 +11,7 @@ import {
 } from '@/db/procurement-requests';
 import { StatusBadge, Alert, Button } from '@/components/ui';
 import SubmitRequestButton from '@/components/agency/SubmitRequestButton';
+import DocumentUploadForm from '@/components/agency/DocumentUploadForm';
 import CommentForm from '@/components/shared/CommentForm';
 import type { RequestStatus } from '@/types/database';
 
@@ -57,9 +58,18 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
     request.status === 'withdrawn';
 
   const completion = calcChecklistCompletion(checklistItems);
-  const pendingRequired = checklistItems.filter(
-    (i) => i.is_required && i.status === 'pending',
+  const documentedItemIds = new Set(
+    documents
+      .filter((document) => document.status === 'uploaded' || document.status === 'accepted')
+      .map((document) => document.checklist_item_id)
+      .filter((id): id is string => Boolean(id)),
   );
+  const pendingRequired = checklistItems.filter(
+    (item) => item.is_required && !documentedItemIds.has(item.id),
+  );
+  const documentedRequired = checklistItems.filter(
+    (item) => item.is_required && documentedItemIds.has(item.id),
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -80,7 +90,7 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
               : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex shrink-0 items-center gap-3">
           <StatusBadge status={request.status as RequestStatus} dot />
           {isEditable && (
             <Link href={`/agency/requests/${requestId}/edit`}>
@@ -95,24 +105,20 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
       {/* Correction alert */}
       {request.status === 'awaiting_correction' && (
         <Alert variant="warning" title="Corrections Requested">
-          An analyst has requested corrections. Please review the comments below, make any
-          necessary changes, upload the required documents, and resubmit.
+          An analyst has requested corrections. Please review the comments below, make any necessary
+          changes, upload the required documents, and resubmit.
         </Alert>
       )}
 
       {/* Approved / Rejected banners */}
       {request.status === 'approved' && (
         <Alert variant="success" title="Request Approved">
-          {request.decision_rationale && (
-            <span>Rationale: {request.decision_rationale}</span>
-          )}
+          {request.decision_rationale && <span>Rationale: {request.decision_rationale}</span>}
         </Alert>
       )}
       {request.status === 'rejected' && (
         <Alert variant="error" title="Request Rejected">
-          {request.decision_rationale && (
-            <span>Rationale: {request.decision_rationale}</span>
-          )}
+          {request.decision_rationale && <span>Rationale: {request.decision_rationale}</span>}
         </Alert>
       )}
 
@@ -127,7 +133,7 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
             <dl className="divide-y divide-slate-100">
               <div className="grid grid-cols-3 gap-4 px-5 py-3">
                 <dt className="text-xs font-medium text-slate-500">Description</dt>
-                <dd className="col-span-2 text-sm text-slate-800 whitespace-pre-wrap">
+                <dd className="col-span-2 text-sm whitespace-pre-wrap text-slate-800">
                   {request.description}
                 </dd>
               </div>
@@ -168,7 +174,7 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
               <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                 <h2 className="text-sm font-semibold text-slate-900">Required Documents</h2>
                 <span className="text-xs text-slate-500">
-                  {completion.requiredSatisfied}/{completion.required} required
+                  {documentedRequired}/{completion.required} documents attached
                 </span>
               </div>
               <ul className="divide-y divide-slate-100">
@@ -183,7 +189,9 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
                           <p className="text-sm font-medium text-slate-800">
                             {item.label}
                             {item.is_required && (
-                              <span className="ml-1 text-red-500" aria-label="required">*</span>
+                              <span className="ml-1 text-red-500" aria-label="required">
+                                *
+                              </span>
                             )}
                           </p>
                           {item.description && (
@@ -198,7 +206,9 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
                         <span
                           className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusCfg.classes}`}
                         >
-                          {statusCfg.label}
+                          {documentedItemIds.has(item.id) && item.status === 'pending'
+                            ? 'Attached'
+                            : statusCfg.label}
                         </span>
                       </div>
                     </li>
@@ -222,11 +232,9 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
             ) : (
               <ul className="divide-y divide-slate-100">
                 {documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between px-5 py-3 gap-3">
+                  <li key={doc.id} className="flex items-center justify-between gap-3 px-5 py-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">
-                        {doc.file_name}
-                      </p>
+                      <p className="truncate text-sm font-medium text-slate-800">{doc.file_name}</p>
                       <p className="text-xs text-slate-500">
                         {doc.mime_type}
                         {doc.file_size_bytes ? ` · ${formatBytes(doc.file_size_bytes)}` : ''}
@@ -250,34 +258,52 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
                     >
                       {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
                     </span>
+                    <a
+                      href={`/api/documents/${doc.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="shrink-0 text-xs font-medium text-blue-700 hover:underline"
+                    >
+                      Open
+                    </a>
                   </li>
                 ))}
               </ul>
+            )}
+            {isEditable && (
+              <div className="border-t border-slate-100 px-5 py-4">
+                <DocumentUploadForm
+                  requestId={requestId}
+                  checklistItems={checklistItems.map((item) => ({
+                    id: item.id,
+                    label: item.label,
+                    isRequired: item.is_required,
+                  }))}
+                />
+              </div>
             )}
           </div>
 
           {/* Comments */}
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 px-5 py-4">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Comments ({comments.length})
-              </h2>
+              <h2 className="text-sm font-semibold text-slate-900">Comments ({comments.length})</h2>
             </div>
             <div className="divide-y divide-slate-100">
               {comments.length === 0 && (
-                <p className="px-5 py-6 text-center text-xs text-slate-500">
-                  No comments yet.
-                </p>
+                <p className="px-5 py-6 text-center text-xs text-slate-500">No comments yet.</p>
               )}
               {comments.map((comment) => (
                 <div key={comment.id} className="px-5 py-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-slate-700">{comment.author_name}</span>
+                    <span className="text-xs font-medium text-slate-700">
+                      {comment.author_name}
+                    </span>
                     <span className="text-xs text-slate-400">
                       {new Date(comment.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-800 whitespace-pre-wrap">{comment.body}</p>
+                  <p className="mt-1 text-sm whitespace-pre-wrap text-slate-800">{comment.body}</p>
                 </div>
               ))}
             </div>
@@ -329,7 +355,11 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
                             className="h-3 w-3 text-slate-400"
                             aria-hidden="true"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                            />
                           </svg>
                         </>
                       )}
@@ -338,9 +368,7 @@ export default async function AgencyRequestDetailPage({ params }: PageProps) {
                     <p className="mt-1 text-xs text-slate-400">
                       {new Date(h.created_at).toLocaleString()}
                     </p>
-                    {h.reason && (
-                      <p className="mt-0.5 text-xs text-slate-500 italic">{h.reason}</p>
-                    )}
+                    {h.reason && <p className="mt-0.5 text-xs text-slate-500 italic">{h.reason}</p>}
                   </li>
                 ))}
               </ol>

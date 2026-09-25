@@ -95,10 +95,16 @@ vi.mock('@/lib/supabase/server', () => ({
         eq: vi.fn(() => ({
           single: vi.fn(async () => {
             if (table === 'profiles') {
-              return { data: _mockConfig.profile, error: _mockConfig.profile ? null : { message: 'Not found' } };
+              return {
+                data: _mockConfig.profile,
+                error: _mockConfig.profile ? null : { message: 'Not found' },
+              };
             }
             if (table === 'organizations') {
-              return { data: _mockConfig.organization, error: _mockConfig.organization ? null : { message: 'Not found' } };
+              return {
+                data: _mockConfig.organization,
+                error: _mockConfig.organization ? null : { message: 'Not found' },
+              };
             }
             return { data: null, error: { message: 'Unknown table' } };
           }),

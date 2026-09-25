@@ -78,7 +78,7 @@ export default function StatusBadge({ status, dot = false }: StatusBadgeProps) {
     >
       {dot && (
         <span
-          className={`h-1.5 w-1.5 rounded-full shrink-0 ${config.dotClass}`}
+          className={`h-1.5 w-1.5 shrink-0 rounded-full ${config.dotClass}`}
           aria-hidden="true"
         />
       )}

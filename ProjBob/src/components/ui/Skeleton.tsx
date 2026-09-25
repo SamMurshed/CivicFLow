@@ -21,11 +21,7 @@ function Line({ width = 'w-full', className = '' }: SkeletonLineProps) {
     <div
       role="status"
       aria-label="Loading…"
-      className={[
-        'h-3.5 animate-pulse rounded bg-slate-200',
-        width,
-        className,
-      ]
+      className={['h-3.5 animate-pulse rounded bg-slate-200', width, className]
         .filter(Boolean)
         .join(' ')}
     />
@@ -37,11 +33,7 @@ function Block({ height = 'h-32', className = '' }: SkeletonBlockProps) {
     <div
       role="status"
       aria-label="Loading…"
-      className={[
-        'w-full animate-pulse rounded-lg bg-slate-200',
-        height,
-        className,
-      ]
+      className={['w-full animate-pulse rounded-lg bg-slate-200', height, className]
         .filter(Boolean)
         .join(' ')}
     />
@@ -53,9 +45,7 @@ function Circle({ className = 'h-10 w-10' }: { className?: string }) {
     <div
       role="status"
       aria-label="Loading…"
-      className={['animate-pulse rounded-full bg-slate-200', className]
-        .filter(Boolean)
-        .join(' ')}
+      className={['animate-pulse rounded-full bg-slate-200', className].filter(Boolean).join(' ')}
     />
   );
 }
@@ -88,7 +78,7 @@ function CardPreset() {
 function TableRows({ rows = 5 }: { rows?: number }) {
   return (
     <div
-      className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white overflow-hidden"
+      className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 bg-white"
       aria-busy="true"
       aria-label="Loading table…"
     >

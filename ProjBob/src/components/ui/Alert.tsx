@@ -19,10 +19,7 @@ interface AlertProps {
   className?: string;
 }
 
-const VARIANT_CONFIG: Record<
-  AlertVariant,
-  { wrapper: string; icon: string; iconPath: string }
-> = {
+const VARIANT_CONFIG: Record<AlertVariant, { wrapper: string; icon: string; iconPath: string }> = {
   info: {
     wrapper: 'bg-blue-50 border-blue-200 text-blue-800',
     icon: 'text-blue-500',
@@ -32,8 +29,7 @@ const VARIANT_CONFIG: Record<
   success: {
     wrapper: 'bg-emerald-50 border-emerald-200 text-emerald-800',
     icon: 'text-emerald-500',
-    iconPath:
-      'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    iconPath: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   warning: {
     wrapper: 'bg-amber-50 border-amber-200 text-amber-800',
@@ -44,8 +40,7 @@ const VARIANT_CONFIG: Record<
   error: {
     wrapper: 'bg-red-50 border-red-200 text-red-800',
     icon: 'text-red-500',
-    iconPath:
-      'M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z',
+    iconPath: 'M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z',
   },
 };
 
@@ -65,11 +60,7 @@ export default function Alert({
   return (
     <div
       role="alert"
-      className={[
-        'flex gap-3 rounded-lg border px-4 py-3 text-sm',
-        config.wrapper,
-        className,
-      ]
+      className={['flex gap-3 rounded-lg border px-4 py-3 text-sm', config.wrapper, className]
         .filter(Boolean)
         .join(' ')}
     >
@@ -96,7 +87,7 @@ export default function Alert({
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss"
-          className="ml-auto -mr-1 self-start rounded p-1 opacity-60 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+          className="-mr-1 ml-auto self-start rounded p-1 opacity-60 hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current focus-visible:outline-none"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

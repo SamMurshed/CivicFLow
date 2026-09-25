@@ -81,7 +81,7 @@ export default async function AgencyRequestsPage({ searchParams }: PageProps) {
           type="search"
           defaultValue={search}
           placeholder="Search requests…"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
         <select
           name="status"
@@ -142,7 +142,7 @@ export default async function AgencyRequestsPage({ searchParams }: PageProps) {
               <li key={req.id}>
                 <Link
                   href={`/agency/requests/${req.id}`}
-                  className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
+                  className="flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-900">{req.title}</p>

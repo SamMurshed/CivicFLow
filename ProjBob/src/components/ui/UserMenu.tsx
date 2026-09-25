@@ -26,12 +26,10 @@ export default function UserMenu({ user }: UserMenuProps) {
   return (
     <div className="flex items-center gap-4">
       <div className="hidden text-right sm:block">
-        <p className="text-sm font-medium text-slate-900 leading-tight">{profile.full_name}</p>
-        <p className="text-xs text-slate-500 leading-tight">
+        <p className="text-sm leading-tight font-medium text-slate-900">{profile.full_name}</p>
+        <p className="text-xs leading-tight text-slate-500">
           {organization ? organization.name : roleLabel}
-          {organization && (
-            <span className="ml-1 text-slate-400">· {roleLabel}</span>
-          )}
+          {organization && <span className="ml-1 text-slate-400">· {roleLabel}</span>}
         </p>
       </div>
 

@@ -5,15 +5,7 @@
  * leading coloured indicator dot.
  */
 
-type BadgeVariant =
-  | 'default'
-  | 'blue'
-  | 'green'
-  | 'red'
-  | 'amber'
-  | 'violet'
-  | 'cyan'
-  | 'slate';
+type BadgeVariant = 'default' | 'blue' | 'green' | 'red' | 'amber' | 'violet' | 'cyan' | 'slate';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -62,7 +54,7 @@ export default function Badge({
     >
       {dot && (
         <span
-          className={`h-1.5 w-1.5 rounded-full shrink-0 ${DOT_CLASS[variant]}`}
+          className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_CLASS[variant]}`}
           aria-hidden="true"
         />
       )}

@@ -6,11 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  NAV_CONFIG,
-  ROLE_LABEL,
-  ROLE_BADGE_CLASS,
-} from '@/components/nav/nav-config';
+import { NAV_CONFIG, ROLE_LABEL, ROLE_BADGE_CLASS } from '@/components/nav/nav-config';
 import type { AppRole } from '@/types/database';
 
 const roles: AppRole[] = ['vendor', 'agency_user', 'analyst', 'admin'];
@@ -25,17 +21,21 @@ describe('NAV_CONFIG', () => {
 
     it(`all "${role}" nav items have non-empty hrefs`, () => {
       const sections = NAV_CONFIG[role];
-      sections.flatMap((s) => s.items).forEach((item) => {
-        expect(item.href).toBeTruthy();
-        expect(item.href.startsWith('/')).toBe(true);
-      });
+      sections
+        .flatMap((s) => s.items)
+        .forEach((item) => {
+          expect(item.href).toBeTruthy();
+          expect(item.href.startsWith('/')).toBe(true);
+        });
     });
 
     it(`all "${role}" nav items have non-empty labels`, () => {
       const sections = NAV_CONFIG[role];
-      sections.flatMap((s) => s.items).forEach((item) => {
-        expect(item.label.length).toBeGreaterThan(0);
-      });
+      sections
+        .flatMap((s) => s.items)
+        .forEach((item) => {
+          expect(item.label.length).toBeGreaterThan(0);
+        });
     });
   });
 });
