@@ -41,19 +41,9 @@ create table public.procurement_requests (
   created_at            timestamptz     not null default now(),
   updated_at            timestamptz     not null default now(),
 
-  -- Constraints
-  constraint pr_agency_is_agency
-    check (
-      agency_org_id in (
-        select id from public.organizations where kind = 'agency'
-      )
-    ),
-  constraint pr_vendor_is_vendor
-    check (
-      vendor_org_id is null or vendor_org_id in (
-        select id from public.organizations where kind = 'vendor'
-      )
-    ),
+  -- Constraints that depend only on this row. Organization-kind validation
+  -- is enforced by a trigger below because PostgreSQL CHECK constraints
+  -- cannot contain subqueries.
   constraint pr_deadline_after_today
     check (submission_deadline is null or submission_deadline > '2000-01-01'),
   constraint pr_decided_requires_rationale
@@ -62,6 +52,44 @@ create table public.procurement_requests (
       or (decision_rationale is not null)
     )
 );
+
+create or replace function public.validate_procurement_request_org_kinds()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (
+    select 1
+    from public.organizations
+    where id = new.agency_org_id and kind = 'agency'
+  ) then
+    raise exception using
+      errcode = '23514',
+      message = 'agency_org_id must reference an agency organization';
+  end if;
+
+  if new.vendor_org_id is not null and not exists (
+    select 1
+    from public.organizations
+    where id = new.vendor_org_id and kind = 'vendor'
+  ) then
+    raise exception using
+      errcode = '23514',
+      message = 'vendor_org_id must reference a vendor organization';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.validate_procurement_request_org_kinds() from public;
+
+create trigger trg_procurement_requests_validate_org_kinds
+  before insert or update of agency_org_id, vendor_org_id
+  on public.procurement_requests
+  for each row execute function public.validate_procurement_request_org_kinds();
 
 comment on table public.procurement_requests is
   'Core procurement request. Tracks the full lifecycle from draft to decision.';
