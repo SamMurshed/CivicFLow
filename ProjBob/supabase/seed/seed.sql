@@ -21,7 +21,10 @@
 --  10. notifications
 -- ============================================================
 
--- Disable RLS for the seed session so inserts bypass policies
+-- Keep the seed atomic: any failure rolls back all inserts.
+begin;
+
+-- Disable RLS for the seed transaction so inserts bypass policies
 -- (run as postgres / service role in production migrations)
 set local role postgres;
 
@@ -443,3 +446,5 @@ on conflict do nothing;
 -- Re-enable standard role
 -- ──────────────────────────────────────────────────────────
 reset role;
+
+commit;
