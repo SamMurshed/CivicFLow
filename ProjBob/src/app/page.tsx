@@ -16,8 +16,7 @@ const roles = [
   },
   {
     title: 'Administrator',
-    description:
-      'Manage organizations, users, checklist templates, and system-wide reporting.',
+    description: 'Manage organizations, users, checklist templates, and system-wide reporting.',
   },
 ];
 
@@ -92,8 +91,8 @@ export default function Home() {
             <p className="mt-6 text-lg leading-8 text-slate-600">
               CivicFlow is a procurement operations platform built for the public sector. It
               connects vendors, agency users, and procurement analysts in a single, structured
-              workflow — from request creation through document review and final approval.
-              Every step is tracked, auditable, and accessible to the right stakeholders.
+              workflow — from request creation through document review and final approval. Every
+              step is tracked, auditable, and accessible to the right stakeholders.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
@@ -157,7 +156,7 @@ export default function Home() {
                   {index < steps.length - 1 && (
                     <span
                       aria-hidden="true"
-                      className="absolute left-[calc(50%+2rem)] top-5 hidden h-px w-[calc(100%-4rem)] bg-slate-200 lg:block"
+                      className="absolute top-5 left-[calc(50%+2rem)] hidden h-px w-[calc(100%-4rem)] bg-slate-200 lg:block"
                     />
                   )}
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">

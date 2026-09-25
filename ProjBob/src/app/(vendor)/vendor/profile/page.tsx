@@ -45,8 +45,8 @@ export default async function VendorProfilePage() {
 
       {/* Fictional data disclaimer */}
       <Alert variant="info" title="Fictional demonstration data">
-        All information on this profile is fictional and created for demonstration purposes only.
-        It has not been verified by the City of New York or any government authority.
+        All information on this profile is fictional and created for demonstration purposes only. It
+        has not been verified by the City of New York or any government authority.
       </Alert>
 
       {/* Profile completeness */}
@@ -104,9 +104,7 @@ export default async function VendorProfilePage() {
             <CardSection>
               <dl className="grid grid-cols-1 gap-4">
                 <ProfileField label="Primary Category" value={vp.primary_category} />
-                {vp.description && (
-                  <ProfileField label="Description" value={vp.description} />
-                )}
+                {vp.description && <ProfileField label="Description" value={vp.description} />}
               </dl>
             </CardSection>
           </Card>

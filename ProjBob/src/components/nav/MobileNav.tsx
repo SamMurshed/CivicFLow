@@ -77,7 +77,7 @@ export default function MobileNav({ sections, isOpen, onClose }: MobileNavProps)
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
             aria-label="Close navigation menu"
           >
             <svg
@@ -100,7 +100,7 @@ export default function MobileNav({ sections, isOpen, onClose }: MobileNavProps)
             {sections.map((section, si) => (
               <div key={si}>
                 {section.title && (
-                  <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="mb-1 px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase">
                     {section.title}
                   </p>
                 )}

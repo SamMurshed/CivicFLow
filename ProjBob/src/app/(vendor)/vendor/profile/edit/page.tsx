@@ -38,8 +38,8 @@ export default async function VendorProfileEditPage() {
 
       {/* Fictional data disclaimer */}
       <Alert variant="info" title="Fictional demonstration data">
-        All information on this page is fictional and created for demonstration purposes only.
-        It is NOT verified by the City of New York or any government authority.
+        All information on this page is fictional and created for demonstration purposes only. It is
+        NOT verified by the City of New York or any government authority.
       </Alert>
 
       {/* Profile completeness */}

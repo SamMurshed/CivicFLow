@@ -63,7 +63,11 @@ describe('Button', () => {
   it('does not call onClick when disabled', async () => {
     const user = userEvent.setup();
     const handler = vi.fn();
-    render(<Button disabled onClick={handler}>NoClick</Button>);
+    render(
+      <Button disabled onClick={handler}>
+        NoClick
+      </Button>,
+    );
     await user.click(screen.getByRole('button', { name: 'NoClick' }));
     expect(handler).not.toHaveBeenCalled();
   });
@@ -96,11 +100,7 @@ describe('Input', () => {
 
   it('shows description text', () => {
     render(
-      <Input
-        label="Email desc"
-        name="email-desc"
-        description="We will never share your email."
-      />,
+      <Input label="Email desc" name="email-desc" description="We will never share your email." />,
     );
     expect(screen.getByText('We will never share your email.')).toBeInTheDocument();
   });
@@ -334,12 +334,7 @@ describe('ConfirmDialog', () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     render(
-      <ConfirmDialog
-        open={true}
-        onClose={onClose}
-        onConfirm={() => {}}
-        title="Delete item?"
-      />,
+      <ConfirmDialog open={true} onClose={onClose} onConfirm={() => {}} title="Delete item?" />,
     );
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onClose).toHaveBeenCalledOnce();
@@ -412,11 +407,7 @@ describe('FormErrorSummary', () => {
   });
 
   it('renders error messages', () => {
-    render(
-      <FormErrorSummary
-        errors={{ email: 'Invalid email', nameField: 'Name is required' }}
-      />,
-    );
+    render(<FormErrorSummary errors={{ email: 'Invalid email', nameField: 'Name is required' }} />);
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText('Invalid email')).toBeInTheDocument();
     expect(screen.getByText('Name is required')).toBeInTheDocument();

@@ -33,7 +33,7 @@ export default function FormErrorSummary({
           <li key={field}>
             <a
               href={`#${field}`}
-              className="underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
+              className="rounded underline hover:no-underline focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
             >
               {message}
             </a>

@@ -27,9 +27,7 @@ export function CardHeader({ title, description, action }: CardHeaderProps) {
     <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
       <div>
         <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-        {description && (
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
-        )}
+        {description && <p className="mt-0.5 text-xs text-slate-500">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -37,11 +35,7 @@ export function CardHeader({ title, description, action }: CardHeaderProps) {
 }
 
 export function CardSection({ children, className = '' }: CardSectionProps) {
-  return (
-    <div className={['px-5 py-4', className].filter(Boolean).join(' ')}>
-      {children}
-    </div>
-  );
+  return <div className={['px-5 py-4', className].filter(Boolean).join(' ')}>{children}</div>;
 }
 
 export default function Card({ children, className = '', noPadding = false }: CardProps) {

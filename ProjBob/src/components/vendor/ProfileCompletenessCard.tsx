@@ -17,12 +17,7 @@ interface Props {
 export default function ProfileCompletenessCard({ result, editHref }: Props) {
   const { percent, missingFields } = result;
 
-  const barColor =
-    percent >= 80
-      ? 'bg-emerald-500'
-      : percent >= 50
-        ? 'bg-amber-500'
-        : 'bg-red-500';
+  const barColor = percent >= 80 ? 'bg-emerald-500' : percent >= 50 ? 'bg-amber-500' : 'bg-red-500';
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
@@ -57,7 +52,7 @@ export default function ProfileCompletenessCard({ result, editHref }: Props) {
           {editHref && (
             <Link
               href={editHref}
-              className="mt-3 inline-block text-xs font-medium text-blue-600 underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="mt-3 inline-block text-xs font-medium text-blue-600 underline hover:no-underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
             >
               Complete your profile →
             </Link>

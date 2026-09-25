@@ -19,9 +19,7 @@ export default async function AgencyDashboardPage() {
     <div>
       {/* Page heading */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900">
-          Welcome back, {user.profile.full_name}
-        </h1>
+        <h1 className="text-xl font-bold text-slate-900">Welcome back, {user.profile.full_name}</h1>
         <p className="mt-0.5 text-sm text-slate-500">
           {user.organization ? user.organization.name : 'Agency Portal'}
         </p>
@@ -31,8 +29,7 @@ export default async function AgencyDashboardPage() {
       {counts.awaitingCorrectionRequests > 0 && (
         <Alert variant="warning" title="Action required" className="mb-6">
           {counts.awaitingCorrectionRequests} of your procurement request
-          {counts.awaitingCorrectionRequests > 1 ? 's are' : ' is'} awaiting correction
-          information.{' '}
+          {counts.awaitingCorrectionRequests > 1 ? 's are' : ' is'} awaiting correction information.{' '}
           <Link href="/agency/requests?status=awaiting_correction" className="underline">
             View now
           </Link>
@@ -88,7 +85,7 @@ export default async function AgencyDashboardPage() {
         <div className="divide-y divide-slate-100">
           {recentResult.requests.length === 0 ? (
             <div className="px-5 py-6 text-center">
-              <p className="text-sm text-slate-500 mb-3">No requests yet.</p>
+              <p className="mb-3 text-sm text-slate-500">No requests yet.</p>
               <Link href="/agency/requests/new">
                 <Button size="sm">Create your first request</Button>
               </Link>
@@ -98,9 +95,9 @@ export default async function AgencyDashboardPage() {
               <Link
                 key={req.id}
                 href={`/agency/requests/${req.id}`}
-                className="flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-slate-50"
               >
-                <p className="text-sm font-medium text-slate-800 truncate">{req.title}</p>
+                <p className="truncate text-sm font-medium text-slate-800">{req.title}</p>
                 <StatusBadge status={req.status as RequestStatus} dot />
               </Link>
             ))

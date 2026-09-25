@@ -12,10 +12,7 @@
 
 import { useActionState } from 'react';
 import { Input, Select, Textarea, Button, FormErrorSummary, Alert } from '@/components/ui';
-import {
-  BUSINESS_CATEGORIES,
-  MWBE_DESIGNATIONS,
-} from '@/validation/vendor-profile';
+import { BUSINESS_CATEGORIES, MWBE_DESIGNATIONS } from '@/validation/vendor-profile';
 import type { VendorOrgProfile } from '@/types/database';
 import { updateVendorProfile, INITIAL_STATE } from '@/lib/vendor-profile-actions';
 
@@ -36,15 +33,11 @@ export default function VendorProfileForm({ defaultValues }: Props) {
           {state.error}
         </Alert>
       )}
-      {state.error && Object.keys(fe).length > 0 && (
-        <FormErrorSummary errors={fe} />
-      )}
+      {state.error && Object.keys(fe).length > 0 && <FormErrorSummary errors={fe} />}
 
       {/* Legal & Identity */}
       <fieldset>
-        <legend className="mb-4 text-sm font-semibold text-slate-900">
-          Legal &amp; Identity
-        </legend>
+        <legend className="mb-4 text-sm font-semibold text-slate-900">Legal &amp; Identity</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Legal Name"
@@ -97,9 +90,7 @@ export default function VendorProfileForm({ defaultValues }: Props) {
 
       {/* Address */}
       <fieldset>
-        <legend className="mb-4 text-sm font-semibold text-slate-900">
-          Business Address
-        </legend>
+        <legend className="mb-4 text-sm font-semibold text-slate-900">Business Address</legend>
         <div className="space-y-4">
           <Input
             label="Address Line 1"
@@ -152,9 +143,7 @@ export default function VendorProfileForm({ defaultValues }: Props) {
 
       {/* Contact */}
       <fieldset>
-        <legend className="mb-4 text-sm font-semibold text-slate-900">
-          Contact Information
-        </legend>
+        <legend className="mb-4 text-sm font-semibold text-slate-900">Contact Information</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Contact Person"
@@ -189,9 +178,7 @@ export default function VendorProfileForm({ defaultValues }: Props) {
 
       {/* Business categories */}
       <fieldset>
-        <legend className="mb-4 text-sm font-semibold text-slate-900">
-          Business Categories
-        </legend>
+        <legend className="mb-4 text-sm font-semibold text-slate-900">Business Categories</legend>
         <div className="space-y-4">
           <Select
             label="Primary Business Category"
@@ -225,7 +212,7 @@ export default function VendorProfileForm({ defaultValues }: Props) {
       <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
         <a
           href="/vendor/profile"
-          className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
         >
           Cancel
         </a>

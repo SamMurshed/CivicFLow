@@ -87,7 +87,7 @@ export default function Pagination({
               aria-label={`Page ${page}`}
               aria-current={page === currentPage ? 'page' : undefined}
               className={[
-                'h-8 w-8 rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                'h-8 w-8 rounded-md text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none',
                 page === currentPage
                   ? 'bg-blue-600 text-white'
                   : 'text-slate-600 hover:bg-slate-100',

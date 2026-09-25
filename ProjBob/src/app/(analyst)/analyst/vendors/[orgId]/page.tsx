@@ -50,8 +50,8 @@ export default async function AnalystVendorProfilePage({ params }: Props) {
 
       {/* Fictional data disclaimer */}
       <Alert variant="info" title="Fictional demonstration data">
-        All information displayed here is fictional and created for demonstration purposes only.
-        It has not been verified by the City of New York or any government authority.
+        All information displayed here is fictional and created for demonstration purposes only. It
+        has not been verified by the City of New York or any government authority.
       </Alert>
 
       {/* Completeness */}
@@ -105,9 +105,7 @@ export default async function AnalystVendorProfilePage({ params }: Props) {
             <CardSection>
               <dl className="grid grid-cols-1 gap-4">
                 <ProfileField label="Primary Category" value={vp.primary_category} />
-                {vp.description && (
-                  <ProfileField label="Description" value={vp.description} />
-                )}
+                {vp.description && <ProfileField label="Description" value={vp.description} />}
               </dl>
             </CardSection>
           </Card>

@@ -73,7 +73,7 @@ export default async function AnalystQueuePage({ searchParams }: PageProps) {
           type="search"
           defaultValue={search}
           placeholder="Search requests…"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
         <select
           name="status"
@@ -128,7 +128,9 @@ export default async function AnalystQueuePage({ searchParams }: PageProps) {
       {result.requests.length === 0 ? (
         <EmptyState
           title="Queue is empty"
-          description={hasFilters ? 'No requests match your filters.' : 'No requests awaiting review.'}
+          description={
+            hasFilters ? 'No requests match your filters.' : 'No requests awaiting review.'
+          }
           iconPath="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"
         />
       ) : (
@@ -136,13 +138,9 @@ export default async function AnalystQueuePage({ searchParams }: PageProps) {
           <ul className="divide-y divide-slate-100">
             {result.requests.map((req) => {
               // Oldest submitted requests appear first — flag stale items
-              const submittedAt = req.submitted_at
-                ? new Date(req.submitted_at)
-                : null;
+              const submittedAt = req.submitted_at ? new Date(req.submitted_at) : null;
               const daysSince = submittedAt
-                ? Math.floor(
-                    (nowMs - submittedAt.getTime()) / (1000 * 60 * 60 * 24),
-                  )
+                ? Math.floor((nowMs - submittedAt.getTime()) / (1000 * 60 * 60 * 24))
                 : null;
               const isStale = daysSince !== null && daysSince > 7;
 
@@ -150,13 +148,11 @@ export default async function AnalystQueuePage({ searchParams }: PageProps) {
                 <li key={req.id}>
                   <Link
                     href={`/analyst/queue/${req.id}`}
-                    className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-slate-50 transition-colors"
+                    className="flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-slate-50"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="truncate text-sm font-medium text-slate-900">
-                          {req.title}
-                        </p>
+                        <p className="truncate text-sm font-medium text-slate-900">{req.title}</p>
                         {isStale && (
                           <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
                             {daysSince}d old
@@ -165,9 +161,7 @@ export default async function AnalystQueuePage({ searchParams }: PageProps) {
                       </div>
                       <p className="mt-0.5 text-xs text-slate-500">
                         {req.agency_name ?? 'Unknown agency'} · {req.category}
-                        {submittedAt
-                          ? ` · Submitted ${submittedAt.toLocaleDateString()}`
-                          : ''}
+                        {submittedAt ? ` · Submitted ${submittedAt.toLocaleDateString()}` : ''}
                       </p>
                     </div>
                     <StatusBadge status={req.status as RequestStatus} dot />

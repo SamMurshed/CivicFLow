@@ -20,9 +20,7 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
           // `setAll` is called from a Server Component where cookies cannot be
           // mutated.  The session will still be refreshed by the proxy layer.

@@ -25,17 +25,13 @@ export default function Textarea({
   const textareaId = id ?? name ?? label.toLowerCase().replace(/\s+/g, '-');
   const descId = description ? `${textareaId}-desc` : undefined;
   const errorId = error ? `${textareaId}-error` : undefined;
-  const ariaDescribedBy =
-    [descId, errorId].filter(Boolean).join(' ') || undefined;
+  const ariaDescribedBy = [descId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className="flex flex-col gap-1">
       <label
         htmlFor={textareaId}
-        className={[
-          'text-sm font-medium text-slate-700',
-          srOnlyLabel ? 'sr-only' : '',
-        ]
+        className={['text-sm font-medium text-slate-700', srOnlyLabel ? 'sr-only' : '']
           .filter(Boolean)
           .join(' ')}
       >
@@ -62,13 +58,11 @@ export default function Textarea({
         aria-invalid={error ? 'true' : undefined}
         className={[
           'block w-full rounded-md border px-3 py-2 text-sm text-slate-900',
-          'placeholder:text-slate-400 resize-y',
+          'resize-y placeholder:text-slate-400',
           'transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+          'focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none',
           'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
-          error
-            ? 'border-red-400 bg-red-50 focus:ring-red-400'
-            : 'border-slate-300 bg-white',
+          error ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-slate-300 bg-white',
           className,
         ]
           .filter(Boolean)

@@ -47,11 +47,7 @@ export type MWBEDesignation = (typeof MWBE_DESIGNATIONS)[number];
 
 // ─── Shared field rules ────────────────────────────────────────────────────────
 
-const nonEmptyString = (label: string) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} is required.`);
+const nonEmptyString = (label: string) => z.string().trim().min(1, `${label} is required.`);
 
 const optionalString = z.string().trim().optional();
 
@@ -59,10 +55,7 @@ const optionalString = z.string().trim().optional();
 
 export const vendorOrgProfileSchema = z.object({
   /** Registered legal name of the business */
-  legal_name: nonEmptyString('Legal name').max(
-    200,
-    'Legal name must be 200 characters or fewer.',
-  ),
+  legal_name: nonEmptyString('Legal name').max(200, 'Legal name must be 200 characters or fewer.'),
 
   /** Display name shown to agency users and analysts */
   display_name: nonEmptyString('Display name').max(
@@ -132,11 +125,7 @@ export type VendorOrgProfileInput = z.infer<typeof vendorOrgProfileSchema>;
 export const vendorStatusSchema = z.object({
   organization_id: z.string().uuid('Invalid organisation ID.'),
   is_active: z.boolean(),
-  reason: z
-    .string()
-    .trim()
-    .max(500, 'Reason must be 500 characters or fewer.')
-    .optional(),
+  reason: z.string().trim().max(500, 'Reason must be 500 characters or fewer.').optional(),
 });
 
 export type VendorStatusInput = z.infer<typeof vendorStatusSchema>;

@@ -40,7 +40,12 @@ export function calcProfileCompleteness(
   profile: Partial<VendorOrgProfile> | null | undefined,
 ): CompletenessResult {
   if (!profile) {
-    return { percent: 0, missingFields: REQUIRED_FIELDS.map((f) => f.label), filled: 0, total: REQUIRED_FIELDS.length };
+    return {
+      percent: 0,
+      missingFields: REQUIRED_FIELDS.map((f) => f.label),
+      filled: 0,
+      total: REQUIRED_FIELDS.length,
+    };
   }
 
   const missingFields: string[] = [];

@@ -13,9 +13,7 @@ export default async function VendorDashboardPage() {
     <div>
       {/* Page heading */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900">
-          Welcome back, {user.profile.full_name}
-        </h1>
+        <h1 className="text-xl font-bold text-slate-900">Welcome back, {user.profile.full_name}</h1>
         <p className="mt-0.5 text-sm text-slate-500">
           {user.organization ? user.organization.name : 'Vendor Portal'}
         </p>

@@ -39,9 +39,7 @@ export default function EmptyState({
         </svg>
       </div>
       <p className="mb-1 text-sm font-semibold text-slate-700">{title}</p>
-      {description && (
-        <p className="mb-4 max-w-sm text-xs text-slate-500">{description}</p>
-      )}
+      {description && <p className="mb-4 max-w-sm text-xs text-slate-500">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

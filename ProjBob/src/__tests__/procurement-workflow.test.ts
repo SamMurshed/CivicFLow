@@ -20,6 +20,8 @@ import {
   isTransitionAllowed,
   DECISION_TO_STATUS,
   ALLOWED_TRANSITIONS,
+  getSubmissionTargetStatus,
+  isStartReviewAllowed,
 } from '@/validation/procurement-request';
 import { calcChecklistCompletion } from '@/lib/checklist-completion';
 import type { RequestChecklistItem } from '@/types/database';
@@ -36,9 +38,7 @@ const VALID_REQUEST = {
   agency_org_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
 };
 
-function makeChecklistItem(
-  overrides: Partial<RequestChecklistItem> = {},
-): RequestChecklistItem {
+function makeChecklistItem(overrides: Partial<RequestChecklistItem> = {}): RequestChecklistItem {
   return {
     id: 'item-1',
     request_id: 'req-1',
@@ -387,20 +387,22 @@ describe('calcChecklistCompletion', () => {
 // ─── isTransitionAllowed ──────────────────────────────────────────────────────
 
 describe('isTransitionAllowed', () => {
-  it('allows approve from submitted', () => {
-    expect(isTransitionAllowed('submitted', 'approve')).toBe(true);
+  it('requires submitted requests to start review before approval', () => {
+    expect(isTransitionAllowed('submitted', 'approve')).toBe(false);
+    expect(isStartReviewAllowed('submitted')).toBe(true);
   });
 
   it('allows reject from under_review', () => {
     expect(isTransitionAllowed('under_review', 'reject')).toBe(true);
   });
 
-  it('allows request_correction from submitted', () => {
-    expect(isTransitionAllowed('submitted', 'request_correction')).toBe(true);
+  it('does not allow corrections before review starts', () => {
+    expect(isTransitionAllowed('submitted', 'request_correction')).toBe(false);
   });
 
-  it('allows request_correction from correction_submitted', () => {
-    expect(isTransitionAllowed('correction_submitted', 'request_correction')).toBe(true);
+  it('requires correction submissions to re-enter review', () => {
+    expect(isTransitionAllowed('correction_submitted', 'request_correction')).toBe(false);
+    expect(isStartReviewAllowed('correction_submitted')).toBe(true);
   });
 
   it('allows place_on_hold from under_review', () => {
@@ -471,11 +473,9 @@ describe('ALLOWED_TRANSITIONS coverage', () => {
     expect(ALLOWED_TRANSITIONS['awaiting_correction']).toHaveLength(0);
   });
 
-  it('correction_submitted allows standard analyst decisions', () => {
+  it('correction_submitted requires a separate start-review action', () => {
     const allowed = ALLOWED_TRANSITIONS['correction_submitted'];
-    expect(allowed).toContain('approve');
-    expect(allowed).toContain('reject');
-    expect(allowed).toContain('request_correction');
+    expect(allowed).toHaveLength(0);
   });
 
   it('on_hold allows resume and reject only', () => {
@@ -483,5 +483,15 @@ describe('ALLOWED_TRANSITIONS coverage', () => {
     expect(allowed).toContain('resume_from_hold');
     expect(allowed).toContain('reject');
     expect(allowed).not.toContain('approve');
+  });
+});
+
+describe('getSubmissionTargetStatus', () => {
+  it('sends a draft to submitted', () => {
+    expect(getSubmissionTargetStatus('draft')).toBe('submitted');
+  });
+
+  it('sends corrected work to correction_submitted', () => {
+    expect(getSubmissionTargetStatus('awaiting_correction')).toBe('correction_submitted');
   });
 });

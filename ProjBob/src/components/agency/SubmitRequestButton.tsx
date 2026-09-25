@@ -35,9 +35,7 @@ export default function SubmitRequestButton({ requestId, disabled, disabledReaso
           Submit for Review
         </Button>
       </form>
-      {disabled && disabledReason && (
-        <p className="text-xs text-amber-700">{disabledReason}</p>
-      )}
+      {disabled && disabledReason && <p className="text-xs text-amber-700">{disabledReason}</p>}
     </div>
   );
 }

@@ -33,7 +33,7 @@ export default async function SignInPage({ searchParams }: PageProps) {
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <span className="text-2xl font-bold tracking-tight text-slate-900">CivicFlow</span>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sign in to CivicFlow</h1>
           <p className="mt-2 text-sm text-slate-600">Sign in to your account</p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">

@@ -48,9 +48,7 @@ export default function Table<TRow>({
   return (
     <div className={['overflow-x-auto rounded-lg border border-slate-200', className].join(' ')}>
       <table className="min-w-full divide-y divide-slate-200 text-sm">
-        {caption && (
-          <caption className="sr-only">{caption}</caption>
-        )}
+        {caption && <caption className="sr-only">{caption}</caption>}
         <thead className="bg-slate-50">
           <tr>
             {columns.map((col) => (
@@ -59,7 +57,7 @@ export default function Table<TRow>({
                 scope="col"
                 style={col.width ? { width: col.width } : undefined}
                 className={[
-                  'px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500',
+                  'px-4 py-3 text-xs font-semibold tracking-wider text-slate-500 uppercase',
                   ALIGN_CLASS[col.align ?? 'left'],
                   col.srOnly ? 'sr-only' : '',
                 ]
@@ -73,17 +71,13 @@ export default function Table<TRow>({
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
           {rows.map((row) => (
-            <tr
-              key={getRowKey(row)}
-              className="transition-colors hover:bg-slate-50"
-            >
+            <tr key={getRowKey(row)} className="transition-colors hover:bg-slate-50">
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={[
-                    'px-4 py-3 text-slate-700',
-                    ALIGN_CLASS[col.align ?? 'left'],
-                  ].join(' ')}
+                  className={['px-4 py-3 text-slate-700', ALIGN_CLASS[col.align ?? 'left']].join(
+                    ' ',
+                  )}
                 >
                   {renderCell(row, col.key)}
                 </td>

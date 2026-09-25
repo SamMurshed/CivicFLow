@@ -55,8 +55,8 @@ export default async function AdminVendorDetailPage({ params }: Props) {
 
       {/* Fictional data disclaimer */}
       <Alert variant="info" title="Fictional demonstration data">
-        All information displayed here is fictional and created for demonstration purposes only.
-        It has not been verified by the City of New York or any government authority.
+        All information displayed here is fictional and created for demonstration purposes only. It
+        has not been verified by the City of New York or any government authority.
       </Alert>
 
       {/* Status management */}
@@ -126,9 +126,7 @@ export default async function AdminVendorDetailPage({ params }: Props) {
             <CardSection>
               <dl className="grid grid-cols-1 gap-4">
                 <ProfileField label="Primary Category" value={vp.primary_category} />
-                {vp.description && (
-                  <ProfileField label="Description" value={vp.description} />
-                )}
+                {vp.description && <ProfileField label="Description" value={vp.description} />}
               </dl>
             </CardSection>
           </Card>
@@ -136,9 +134,7 @@ export default async function AdminVendorDetailPage({ params }: Props) {
       ) : (
         <Card>
           <div className="py-8 text-center">
-            <p className="text-sm text-slate-500">
-              This vendor has not yet set up their profile.
-            </p>
+            <p className="text-sm text-slate-500">This vendor has not yet set up their profile.</p>
           </div>
         </Card>
       )}

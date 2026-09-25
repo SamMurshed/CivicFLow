@@ -88,8 +88,8 @@ export default async function SystemStatusPage() {
         <p className="mt-6 text-sm text-slate-500">
           Add <code className="rounded bg-slate-100 px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
           <code className="rounded bg-slate-100 px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to{' '}
-          <code className="rounded bg-slate-100 px-1">.env.local</code> then restart the dev
-          server to test connectivity.
+          <code className="rounded bg-slate-100 px-1">.env.local</code> then restart the dev server
+          to test connectivity.
         </p>
       )}
     </div>

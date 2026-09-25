@@ -13,6 +13,7 @@
  */
 
 import { requireRole } from '@/lib/auth/dal';
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { logEvent } from '@/lib/activity-log';
 import { notify } from '@/lib/notifications';
@@ -21,12 +22,26 @@ import {
   commentSchema,
   DECISION_TO_STATUS,
   isTransitionAllowed,
+  isStartReviewAllowed,
+  checklistReviewSchema,
+  documentReviewSchema,
 } from '@/validation/procurement-request';
 import type { ActionState } from '@/lib/vendor-profile-actions';
 import type { RequestStatus } from '@/types/database';
 
 export type { ActionState };
 export const INITIAL_STATE: ActionState = { success: false, error: null, fieldErrors: {} };
+
+function fieldErrorsFromIssues(
+  issues: Array<{ path: PropertyKey[]; message: string }>,
+): Record<string, string | undefined> {
+  const fieldErrors: Record<string, string | undefined> = {};
+  for (const issue of issues) {
+    const key = String(issue.path[0] ?? 'form');
+    if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+  }
+  return fieldErrors;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -52,6 +67,64 @@ async function recordStatusTransition(
 }
 
 // ─── recordReviewDecision ─────────────────────────────────────────────────────
+
+export async function startReview(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireRole('analyst', 'admin');
+  const requestId = String(formData.get('request_id') ?? '');
+  if (!requestId) {
+    return { success: false, error: 'Request ID is required.', fieldErrors: {} };
+  }
+
+  const supabase = await createClient();
+  const { data: request, error } = await supabase
+    .from('procurement_requests')
+    .select('id, status, assigned_analyst')
+    .eq('id', requestId)
+    .single();
+
+  if (error || !request) {
+    return { success: false, error: 'Request not found.', fieldErrors: {} };
+  }
+  if (!isStartReviewAllowed(request.status as RequestStatus)) {
+    return { success: false, error: 'This request is not ready to begin review.', fieldErrors: {} };
+  }
+  if (user.role === 'analyst' && request.assigned_analyst && request.assigned_analyst !== user.id) {
+    return {
+      success: false,
+      error: 'This request is assigned to another analyst.',
+      fieldErrors: {},
+    };
+  }
+
+  const fromStatus = request.status as RequestStatus;
+  const { error: updateError } = await supabase
+    .from('procurement_requests')
+    .update({ status: 'under_review', assigned_analyst: request.assigned_analyst ?? user.id })
+    .eq('id', requestId)
+    .eq('status', fromStatus);
+
+  if (updateError) {
+    return {
+      success: false,
+      error: 'Unable to start review. Refresh and try again.',
+      fieldErrors: {},
+    };
+  }
+
+  await recordStatusTransition(requestId, user.id, fromStatus, 'under_review', 'Review started');
+  await logEvent({
+    actor_id: user.id,
+    event_type: 'procurement_request.review_started',
+    entity_type: 'procurement_request',
+    entity_id: requestId,
+  });
+  revalidatePath(`/analyst/queue/${requestId}`);
+  revalidatePath('/analyst/queue');
+  return { success: true, error: null, fieldErrors: {} };
+}
 
 /**
  * Records a formal analyst decision on a request.
@@ -111,6 +184,39 @@ export async function recordReviewDecision(
     };
   }
 
+  if (parsed.data.decision === 'approve') {
+    const { data: checklist } = await supabase
+      .from('request_checklist_items')
+      .select('is_required, status')
+      .eq('request_id', parsed.data.request_id);
+    const incomplete = (checklist ?? []).filter(
+      (item: { is_required: boolean; status: string }) =>
+        item.is_required && !['satisfied', 'waived'].includes(item.status),
+    );
+    if (incomplete.length > 0) {
+      return {
+        success: false,
+        error: 'Complete or waive every required checklist item before approval.',
+        fieldErrors: {},
+      };
+    }
+  }
+
+  if (parsed.data.decision === 'request_correction') {
+    const { count } = await supabase
+      .from('request_checklist_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('request_id', parsed.data.request_id)
+      .eq('status', 'flagged');
+    if (!count) {
+      return {
+        success: false,
+        error: 'Flag at least one checklist item before requesting corrections.',
+        fieldErrors: {},
+      };
+    }
+  }
+
   const newStatus = DECISION_TO_STATUS[parsed.data.decision];
 
   // Decide times
@@ -136,7 +242,11 @@ export async function recordReviewDecision(
     .eq('id', parsed.data.request_id);
 
   if (updateErr) {
-    return { success: false, error: 'Failed to record decision. Please try again.', fieldErrors: {} };
+    return {
+      success: false,
+      error: 'Failed to record decision. Please try again.',
+      fieldErrors: {},
+    };
   }
 
   // Append review action record
@@ -199,6 +309,145 @@ export async function recordReviewDecision(
     });
   }
 
+  revalidatePath(`/analyst/queue/${parsed.data.request_id}`);
+  revalidatePath('/analyst/queue');
+
+  return { success: true, error: null, fieldErrors: {} };
+}
+
+export async function updateChecklistItem(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireRole('analyst', 'admin');
+  const parsed = checklistReviewSchema.safeParse({
+    request_id: formData.get('request_id'),
+    item_id: formData.get('item_id'),
+    status: formData.get('status'),
+    note: formData.get('note') || null,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: 'Please correct the checklist review.',
+      fieldErrors: fieldErrorsFromIssues(parsed.error.issues),
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: request } = await supabase
+    .from('procurement_requests')
+    .select('status, assigned_analyst')
+    .eq('id', parsed.data.request_id)
+    .single();
+  if (!request || !['under_review', 'on_hold'].includes(request.status)) {
+    return {
+      success: false,
+      error: 'Checklist review is not available for this request.',
+      fieldErrors: {},
+    };
+  }
+  if (user.role === 'analyst' && request.assigned_analyst !== user.id) {
+    return { success: false, error: 'You are not assigned to this request.', fieldErrors: {} };
+  }
+
+  const resolved = ['satisfied', 'waived'].includes(parsed.data.status);
+  const { error } = await supabase
+    .from('request_checklist_items')
+    .update({
+      status: parsed.data.status,
+      analyst_note: parsed.data.note,
+      resolved_at: resolved ? new Date().toISOString() : null,
+    })
+    .eq('id', parsed.data.item_id)
+    .eq('request_id', parsed.data.request_id);
+  if (error) {
+    return { success: false, error: 'Unable to update the checklist item.', fieldErrors: {} };
+  }
+
+  await logEvent({
+    actor_id: user.id,
+    event_type: 'checklist_item.reviewed',
+    entity_type: 'request_checklist_item',
+    entity_id: parsed.data.item_id,
+    metadata: { request_id: parsed.data.request_id, status: parsed.data.status },
+  });
+  revalidatePath(`/analyst/queue/${parsed.data.request_id}`);
+  return { success: true, error: null, fieldErrors: {} };
+}
+
+export async function reviewDocument(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireRole('analyst', 'admin');
+  const parsed = documentReviewSchema.safeParse({
+    request_id: formData.get('request_id'),
+    document_id: formData.get('document_id'),
+    status: formData.get('status'),
+    note: formData.get('note') || null,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: 'Please correct the document review.',
+      fieldErrors: fieldErrorsFromIssues(parsed.error.issues),
+    };
+  }
+
+  const supabase = await createClient();
+  const { data: request } = await supabase
+    .from('procurement_requests')
+    .select('status, assigned_analyst')
+    .eq('id', parsed.data.request_id)
+    .single();
+  if (!request || request.status !== 'under_review') {
+    return {
+      success: false,
+      error: 'Documents can only be reviewed during active review.',
+      fieldErrors: {},
+    };
+  }
+  if (user.role === 'analyst' && request.assigned_analyst !== user.id) {
+    return { success: false, error: 'You are not assigned to this request.', fieldErrors: {} };
+  }
+
+  const { data: document, error } = await supabase
+    .from('request_documents')
+    .update({
+      status: parsed.data.status,
+      reviewer_note: parsed.data.note,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user.id,
+    })
+    .eq('id', parsed.data.document_id)
+    .eq('request_id', parsed.data.request_id)
+    .select('checklist_item_id')
+    .single();
+  if (error || !document) {
+    return { success: false, error: 'Unable to review the document.', fieldErrors: {} };
+  }
+
+  if (document.checklist_item_id) {
+    await supabase
+      .from('request_checklist_items')
+      .update({
+        status: parsed.data.status === 'accepted' ? 'satisfied' : 'flagged',
+        analyst_note: parsed.data.note,
+        resolved_at: parsed.data.status === 'accepted' ? new Date().toISOString() : null,
+      })
+      .eq('id', document.checklist_item_id)
+      .eq('request_id', parsed.data.request_id);
+  }
+
+  await logEvent({
+    actor_id: user.id,
+    event_type: `document.${parsed.data.status}`,
+    entity_type: 'request_document',
+    entity_id: parsed.data.document_id,
+    metadata: { request_id: parsed.data.request_id },
+  });
+  revalidatePath(`/analyst/queue/${parsed.data.request_id}`);
   return { success: true, error: null, fieldErrors: {} };
 }
 
@@ -287,8 +536,7 @@ export async function postComment(
     request_id: formData.get('request_id'),
     body: formData.get('body'),
     is_internal:
-      formData.get('is_internal') === 'true' &&
-      (user.role === 'analyst' || user.role === 'admin'),
+      formData.get('is_internal') === 'true' && (user.role === 'analyst' || user.role === 'admin'),
     parent_id: formData.get('parent_id') || null,
   };
 
@@ -304,6 +552,22 @@ export async function postComment(
 
   const supabase = await createClient();
 
+  const { data: recentComment } = await supabase
+    .from('comments')
+    .select('created_at')
+    .eq('request_id', parsed.data.request_id)
+    .eq('author_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (recentComment && Date.now() - new Date(recentComment.created_at).getTime() < 5_000) {
+    return {
+      success: false,
+      error: 'Please wait a few seconds before posting again.',
+      fieldErrors: {},
+    };
+  }
+
   const { error: insertErr } = await supabase.from('comments').insert({
     request_id: parsed.data.request_id,
     author_id: user.id,
@@ -318,12 +582,13 @@ export async function postComment(
 
   await logEvent({
     actor_id: user.id,
-    event_type: parsed.data.is_internal
-      ? 'comment.internal_posted'
-      : 'comment.posted',
+    event_type: parsed.data.is_internal ? 'comment.internal_posted' : 'comment.posted',
     entity_type: 'comment',
     entity_id: parsed.data.request_id,
   });
+
+  revalidatePath(`/agency/requests/${parsed.data.request_id}`);
+  revalidatePath(`/analyst/queue/${parsed.data.request_id}`);
 
   return { success: true, error: null, fieldErrors: {} };
 }
@@ -372,7 +637,7 @@ export async function recordDocumentUpload(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireRole('agency_user', 'vendor', 'analyst', 'admin');
+  const user = await requireRole('agency_user', 'vendor');
 
   const requestId = formData.get('request_id') as string;
   const fileName = formData.get('file_name') as string;
@@ -383,12 +648,28 @@ export async function recordDocumentUpload(
     : null;
   const checklistItemId = formData.get('checklist_item_id') as string | null;
 
-  if (!requestId || !fileName || !storagePath) {
+  const allowedMimeTypes = new Set([
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+  ]);
+
+  if (!requestId || !fileName || !storagePath || !checklistItemId) {
     return {
       success: false,
-      error: 'Request ID, file name, and storage path are required.',
+      error: 'Request, checklist item, file name, and storage path are required.',
       fieldErrors: {},
     };
+  }
+  if (!storagePath.startsWith(`${requestId}/`) || fileName.length > 255) {
+    return { success: false, error: 'Invalid document metadata.', fieldErrors: {} };
+  }
+  if (!mimeType || !allowedMimeTypes.has(mimeType)) {
+    return { success: false, error: 'Upload a PDF, DOCX, JPG, or PNG file.', fieldErrors: {} };
+  }
+  if (!fileSizeBytes || fileSizeBytes <= 0 || fileSizeBytes > 10 * 1024 * 1024) {
+    return { success: false, error: 'Files must be between 1 byte and 10 MB.', fieldErrors: {} };
   }
 
   const supabase = await createClient();
@@ -396,19 +677,43 @@ export async function recordDocumentUpload(
   // Verify the request is accessible
   const { data: req } = await supabase
     .from('procurement_requests')
-    .select('id, status')
+    .select('id, status, agency_org_id, vendor_org_id')
     .eq('id', requestId)
     .single();
 
   if (!req) {
     return { success: false, error: 'Request not found.', fieldErrors: {} };
   }
+  const canUpload =
+    (user.role === 'agency_user' &&
+      req.agency_org_id === user.organization?.id &&
+      ['draft', 'awaiting_correction'].includes(req.status)) ||
+    (user.role === 'vendor' &&
+      req.vendor_org_id === user.organization?.id &&
+      req.status === 'awaiting_correction');
+  if (!canUpload) {
+    return {
+      success: false,
+      error: 'Documents cannot be uploaded to this request.',
+      fieldErrors: {},
+    };
+  }
+
+  const { data: checklistItem } = await supabase
+    .from('request_checklist_items')
+    .select('id')
+    .eq('id', checklistItemId)
+    .eq('request_id', requestId)
+    .single();
+  if (!checklistItem) {
+    return { success: false, error: 'Checklist item not found.', fieldErrors: {} };
+  }
 
   const { data: doc, error: insertErr } = await supabase
     .from('request_documents')
     .insert({
       request_id: requestId,
-      checklist_item_id: checklistItemId || null,
+      checklist_item_id: checklistItemId,
       uploaded_by: user.id,
       file_name: fileName,
       storage_path: storagePath,
@@ -427,15 +732,6 @@ export async function recordDocumentUpload(
     };
   }
 
-  // Mark the checklist item as satisfied
-  if (checklistItemId) {
-    await supabase
-      .from('request_checklist_items')
-      .update({ status: 'satisfied', resolved_at: new Date().toISOString() })
-      .eq('id', checklistItemId)
-      .eq('request_id', requestId);
-  }
-
   await logEvent({
     actor_id: user.id,
     event_type: 'document.uploaded',
@@ -443,6 +739,8 @@ export async function recordDocumentUpload(
     entity_id: doc.id,
     metadata: { request_id: requestId, file_name: fileName },
   });
+
+  revalidatePath(`/agency/requests/${requestId}`);
 
   return { success: true, error: null, fieldErrors: {} };
 }

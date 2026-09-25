@@ -24,6 +24,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   checklists: 'Checklist Templates',
   knowledge: 'Knowledge Base',
   reporting: 'Reporting',
+  feedback: 'User Feedback',
   audit: 'Audit Log',
   users: 'Users',
   organisations: 'Organisations',
@@ -36,10 +37,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 function formatSegment(segment: string): string {
   return (
-    SEGMENT_LABELS[segment] ??
-    segment
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase())
+    SEGMENT_LABELS[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   );
 }
 
@@ -84,7 +82,11 @@ export default function Breadcrumbs() {
                   className="h-3 w-3 shrink-0 text-slate-400"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
                 </svg>
               )}
               {isLast ? (
@@ -94,7 +96,7 @@ export default function Breadcrumbs() {
               ) : (
                 <Link
                   href={crumb.href}
-                  className="hover:text-slate-700 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="hover:text-slate-700 hover:underline focus-visible:rounded focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 >
                   {crumb.label}
                 </Link>
